@@ -122,7 +122,7 @@ tr:last-child td{border-bottom:none}
     <div style="text-align:center;margin-bottom:8px">
       <div style="font-size:42px">🏠</div>
       <h1 style="font-size:20px;font-weight:700;margin-top:8px">Mis Apartamentos</h1>
-      <p style="font-size:13px;color:var(--muted);margin-top:4px">Panel de gestión privado · 2025</p>
+      <p style="font-size:13px;color:var(--muted);margin-top:4px">Panel de gestión privado</p>
     </div>
     <div><label>Email</label><input type="email" id="login-email" placeholder="propietario@email.com"></div>
     <div><label>Contraseña</label><input type="password" id="login-pass" placeholder="••••••••"></div>
@@ -136,7 +136,7 @@ tr:last-child td{border-bottom:none}
   <div class="sidebar">
     <div class="sidebar-brand">
       <span style="font-size:22px">🏠</span>
-      <div><div style="font-size:13px;font-weight:700">Mis Apartamentos</div><div style="font-size:10px;color:var(--muted)">Gestión · 2025</div></div>
+      <div><div style="font-size:13px;font-weight:700">Mis Apartamentos</div><div style="font-size:10px;color:var(--muted)">Gestión</div></div>
     </div>
     <nav>
       <button class="nav-btn active" onclick="showPage('dashboard')" id="nav-dashboard"><span>📊</span>Resumen</button>
@@ -185,6 +185,7 @@ tr:last-child td{border-bottom:none}
         <input type="text" class="search-box" id="search-guest" placeholder="🔍 Buscar huésped..." oninput="renderReservas()">
         <input type="date" id="filter-from" class="date-box" onchange="renderReservas()">
         <input type="date" id="filter-to" class="date-box" onchange="renderReservas()">
+        <div id="res-apt-filter-btns" style="display:flex;gap:5px;flex-wrap:wrap"></div>
         <button class="fp on" onclick="setPlatFilter('todas',this)">Todos canales</button>
         <button class="fp" onclick="setPlatFilter('Booking',this)">Booking</button>
         <button class="fp" onclick="setPlatFilter('Airbnb',this)">Airbnb</button>
@@ -284,7 +285,8 @@ tr:last-child td{border-bottom:none}
         </div>
         <div id="ocup-content"></div>
       </div>
-      <div class="card"><div class="card-title">Estacionalidad comparada</div><canvas id="chart-season" height="90" style="margin-top:12px"></canvas></div>
+      <div class="card"><div class="card-title">Estacionalidad comparada · Todos los apartamentos</div><canvas id="chart-season" height="90" style="margin-top:12px"></canvas></div>
+      <div id="ocup-income-wrap"></div>
     </div>
 
     <!-- LARGA TEMPORADA -->
@@ -417,7 +419,7 @@ tr:last-child td{border-bottom:none}
 
 <!-- MODAL: REGISTRAR PAGO LARGA -->
 <div class="modal-bg" id="modal-pago">
-  <div class="modal" style="max-width:380px">
+  <div class="modal" style="max-width:460px">
     <div class="modal-title">Registrar pago mensual</div>
     <input type="hidden" id="pago-contract-id">
     <div class="form-row">
@@ -432,13 +434,43 @@ tr:last-child td{border-bottom:none}
       <div class="form-group"><label>Año</label><input type="number" id="pago-anio" value="2025"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Importe (€)</label><input type="number" id="pago-importe" step="0.01"></div>
-      <div class="form-group"><label>¿Cobrado?</label>
-        <select id="pago-cobrado"><option value="true">✓ Sí, cobrado</option><option value="false">⏳ Pendiente</option></select>
+      <div class="form-group"><label>Renta (€)</label><input type="number" id="pago-importe" step="0.01"></div>
+      <div class="form-group"><label>Renta cobrada</label>
+        <select id="pago-cobrado"><option value="true">✓ Sí, cobrada</option><option value="false">⏳ Pendiente</option></select>
       </div>
     </div>
-    <div class="form-group"><label>Fecha de cobro</label><input type="date" id="pago-fecha"></div>
-    <div class="form-group"><label>Notas</label><input type="text" id="pago-notas" placeholder="Transferencia, efectivo..."></div>
+    <div style="border-top:1px solid var(--border);margin:8px 0;padding-top:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">💡 Suministros del mes</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Electricidad (€) — pago yo, cobro al inquilino</label>
+          <input type="number" id="pago-luz" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group"><label>Luz cobrada al inquilino</label>
+          <select id="pago-luz-cobrada"><option value="false">⏳ Pendiente</option><option value="true">✓ Cobrada</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Agua (€) — pago yo, cobro al inquilino</label>
+          <input type="number" id="pago-agua" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group"><label>Agua cobrada al inquilino</label>
+          <select id="pago-agua-cobrada"><option value="false">⏳ Pendiente</option><option value="true">✓ Cobrada</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Otros gastos (€)</label>
+          <input type="number" id="pago-otros" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group"><label>Otros cobrados</label>
+          <select id="pago-otros-cobrado"><option value="false">⏳ Pendiente</option><option value="true">✓ Cobrado</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="form-group"><label>Fecha cobro renta</label><input type="date" id="pago-fecha"></div>
+    <div class="form-group"><label>Notas</label><input type="text" id="pago-notas" placeholder="Transferencia, efectivo, incidencias..."></div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modal-pago')">Cancelar</button>
       <button class="btn btn-primary" onclick="savePago()">Guardar pago</button>
@@ -454,7 +486,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── STATE ──────────────────────────────────────────────────────────
 let allReservas=[], allGastos=[], allApartments=[], allLarga=[];
-let aptFilter='todos', platFilter='todas', estFilter='todas', yearFilter='todos', charts={};
+let aptFilter='todos', resAptFilter='todos', platFilter='todas', estFilter='todas', yearFilter='todos', charts={};
 const MESES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const MESES_FULL=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const PLAT_COLOR={Booking:'#003B95',Airbnb:'#FF5A5F',Particular:'#00B894',Otro:'#888'};
@@ -510,6 +542,14 @@ function buildSidebar(){
   const opts=allApartments.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
   ['res-apt','gasto-apt','lt-apt'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
   buildYearFilter();
+  buildResAptFilter();
+}
+
+function buildResAptFilter(){
+  const div=document.getElementById('res-apt-filter-btns');
+  if(!div)return;
+  div.innerHTML=`<button class="fp on" onclick="setResAptFilter('todos',this)">Todos apt.</button>`+
+    allApartments.map(a=>`<button class="fp" onclick="setResAptFilter('${a.short_code}',this)" style="border-color:${a.color||'#888'}">${a.short_code}</button>`).join('');
 }
 
 function buildYearFilter(){
@@ -553,10 +593,12 @@ function setAptFilter(apt,btn){
 }
 function setPlatFilter(p,btn){platFilter=p;document.querySelectorAll('.fp').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderReservas();}
 function setEstFilter(e,btn){estFilter=e;document.querySelectorAll('.fp').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderReservas();}
+function setResAptFilter(a,btn){resAptFilter=a;document.querySelectorAll('#res-apt-filter-btns .fp').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderReservas();}
 function filteredRes(){
   return allReservas.filter(r=>{
     if(yearFilter!=='todos'&&new Date(r.check_in).getFullYear()!==parseInt(yearFilter))return false;
     if(aptFilter!=='todos'&&r.apartments?.short_code!==aptFilter)return false;
+    if(resAptFilter!=='todos'&&r.apartments?.short_code!==resAptFilter)return false;
     if(platFilter!=='todas'&&r.platform!==platFilter)return false;
     if(estFilter!=='todas'&&r.status!==estFilter)return false;
     const q=document.getElementById('search-guest')?.value.toLowerCase()||'';
@@ -569,7 +611,7 @@ function filteredRes(){
 }
 
 // ── NAV ────────────────────────────────────────────────────────────
-const PAGE_TITLES={dashboard:'📊 Resumen 2025',reservas:'📋 Reservas',importar:'📥 Importar CSV',gastos:'💰 Gastos',calendario:'📅 Ocupación',larga:'🌙 Larga Temporada'};
+const PAGE_TITLES={dashboard:'📊 Resumen',reservas:'📋 Reservas',importar:'📥 Importar CSV',gastos:'💰 Gastos',calendario:'📅 Ocupación',larga:'🌙 Larga Temporada'};
 function showPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
@@ -759,18 +801,31 @@ function openModalPago(contractId,renta){
   document.getElementById('pago-fecha').value=new Date().toISOString().split('T')[0];
   document.getElementById('pago-mes').value=new Date().getMonth()+1;
   document.getElementById('pago-anio').value=new Date().getFullYear();
+  ['pago-luz','pago-agua','pago-otros'].forEach(id=>document.getElementById(id).value='');
+  ['pago-luz-cobrada','pago-agua-cobrada','pago-otros-cobrado'].forEach(id=>document.getElementById(id).value='false');
+  document.getElementById('pago-cobrado').value='false';
+  document.getElementById('pago-notas').value='';
   openModal('modal-pago');
 }
 async function savePago(){
   const contractId=document.getElementById('pago-contract-id').value;
+  const luz=+document.getElementById('pago-luz').value||0;
+  const agua=+document.getElementById('pago-agua').value||0;
+  const otros=+document.getElementById('pago-otros').value||0;
+  const notesBase=document.getElementById('pago-notas').value;
+  const utilNotes=[
+    luz>0?`Luz: ${luz}€ (${document.getElementById('pago-luz-cobrada').value==='true'?'✓ cobrada':'⏳ pendiente'})`:null,
+    agua>0?`Agua: ${agua}€ (${document.getElementById('pago-agua-cobrada').value==='true'?'✓ cobrada':'⏳ pendiente'})`:null,
+    otros>0?`Otros: ${otros}€ (${document.getElementById('pago-otros-cobrado').value==='true'?'✓ cobrado':'⏳ pendiente'})`:null,
+  ].filter(Boolean).join(' · ');
   const data={
     contract_id:contractId,
     month:+document.getElementById('pago-mes').value,
     year:+document.getElementById('pago-anio').value,
     amount:+document.getElementById('pago-importe').value||0,
     paid:document.getElementById('pago-cobrado').value==='true',
-    paid_on:document.getElementById('pago-fecha').value,
-    notes:document.getElementById('pago-notas').value,
+    paid_on:document.getElementById('pago-fecha').value||null,
+    notes:[notesBase,utilNotes].filter(Boolean).join(' | '),
   };
   const{error}=await sb.from('long_term_payments').insert(data);
   if(error){alert('Error: '+error.message);return;}
@@ -1144,11 +1199,25 @@ function renderLarga(){
         </div>
       </div>
       <div class="lt-payments">
-        ${pays.map(p=>`<div class="lt-pay">
-          <div style="font-size:12px;font-weight:700;margin-bottom:5px">${MESES_FULL[(p.month||1)-1]} ${p.year}</div>
-          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)"><span>Alquiler</span><span style="font-weight:700;color:${p.paid?'#00B894':'#E24B4A'}">${fmt(+p.amount||0)} ${p.paid?'✓':'⏳'}</span></div>
-          ${p.notes?`<div style="font-size:10px;color:var(--muted);margin-top:3px">${p.notes}</div>`:''}
-        </div>`).join('')}
+        ${pays.map(p=>{
+          const utilLines=(p.notes||'').split('|').map(s=>s.trim()).filter(Boolean);
+          return`<div class="lt-pay">
+            <div style="font-size:12px;font-weight:700;margin-bottom:6px">${MESES_FULL[(p.month||1)-1]} ${p.year}</div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
+              <span style="color:var(--muted)">Renta</span>
+              <span style="font-weight:700;color:${p.paid?'#00B894':'#E24B4A'}">${fmt(+p.amount||0)} ${p.paid?'✓':'⏳'}</span>
+            </div>
+            ${utilLines.map(line=>{
+              const isUtil=line.includes('Luz')||line.includes('Agua')||line.includes('Otros');
+              if(!isUtil)return`<div style="font-size:10px;color:var(--muted);margin-top:2px">${line}</div>`;
+              const cobrado=line.includes('✓ cobrada')||line.includes('✓ cobrado');
+              return`<div style="display:flex;justify-content:space-between;font-size:10px;margin-top:3px;padding-top:3px;border-top:1px dashed var(--border)">
+                <span style="color:var(--muted)">${line.split(':')[0]}</span>
+                <span style="color:${cobrado?'#00B894':'#E24B4A'};font-weight:600">${line.split(':')[1]||''}</span>
+              </div>`;
+            }).join('')}
+          </div>`;
+        }).join('')}
         ${lt.status==='active'?`<div class="lt-pay" style="border:2px dashed var(--border);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:12px;min-height:70px" onclick="openModalPago('${lt.id}',${lt.monthly_rent})">+ Registrar pago</div>`:''}
       </div>
       <div style="display:flex;gap:8px">
