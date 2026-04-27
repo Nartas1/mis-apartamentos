@@ -846,16 +846,25 @@ function parseCSV(text){
     }).filter(r=>r.gross_amount>0||r.status==='cancelled');
 
   // ── AIRBNB ────────────────────────────────────────────────────────
-  } else if(h.includes('confirmation code')||h.includes('código de confirmación')||h.includes('gross earnings')){
+  // Columnas: Type, Confirmation code, Start date, End date, Guest, Listing, Gross earnings, Service fee, Cleaning fee
+  // Solo importar filas tipo "Reservation" (ignorar "Payout")
+  } else if(h.includes('confirmation code')||h.includes('gross earnings')||h.includes('listing')){
     platform='Airbnb';
-    mapped=rows.map(r=>({
-      guest_name:r['guest name']||r['nombre del huésped']||r['guest']||'',
-      check_in:parseDate(r['start date']||r['fecha de inicio']||r['check-in']||''),
-      check_out:parseDate(r['end date']||r['fecha de fin']||r['check-out']||''),
-      gross_amount:parseAmount(r['amount']||r['gross earnings']||r['earnings']||r['importe']||'0'),
-      platform_commission:parseAmount(r['host fee']||r['service fee']||r['airbnb service fee']||'0'),
-      cleaning_fee:20,platform:'Airbnb',status:'confirmed',
-    }));
+    mapped=rows
+      .filter(r=>(r['type']||r['tipo']||'').toLowerCase().includes('reservation'))
+      .map(r=>({
+        guest_name:r['guest']||r['guest name']||r['huesped']||r['huésped']||'',
+        check_in:parseDate(r['start date']||r['fecha de inicio']||''),
+        check_out:parseDate(r['end date']||r['fecha de fin']||''),
+        gross_amount:parseFloat(r['gross earnings']||r['amount']||'0')||0,
+        platform_commission:parseFloat(r['service fee']||r['host fee']||'0')||0,
+        cleaning_fee:parseFloat(r['cleaning fee']||'0')||20,
+        platform:'Airbnb',
+        status:'confirmed',
+        external_id:r['confirmation code']||'',
+        notes:r['listing']?'Alojamiento: '+r['listing']:'',
+      }))
+      .filter(r=>r.guest_name&&r.check_in&&r.check_out);
 
   // ── GENÉRICO ──────────────────────────────────────────────────────
   } else {
