@@ -154,8 +154,11 @@ tr:last-child td{border-bottom:none}
 
   <div class="main">
     <div class="topbar">
-      <h2 id="page-title">📊 Resumen 2025</h2>
-      <div class="filter-btns" id="apt-filter-btns"></div>
+      <h2 id="page-title">📊 Resumen</h2>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <select id="year-filter" onchange="setYearFilter(this.value)" style="padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-size:11px;font-weight:600;color:var(--purple);background:#6C5CE715;border-color:var(--purple);outline:none;cursor:pointer"></select>
+        <div class="filter-btns" id="apt-filter-btns"></div>
+      </div>
     </div>
 
     <!-- DASHBOARD -->
@@ -165,7 +168,11 @@ tr:last-child td{border-bottom:none}
         <div class="card" style="flex:2"><div class="card-title">Ingresos por mes · 2025</div><div class="card-sub">Barras por apartamento</div><canvas id="chart-monthly" height="110"></canvas></div>
         <div class="card" style="width:220px"><div class="card-title">Mix canales</div><div class="card-sub">% sobre ingresos brutos</div><canvas id="chart-channels" height="160"></canvas><div id="channel-legend" style="margin-top:10px;display:flex;flex-direction:column;gap:5px"></div></div>
       </div>
-      <div class="card"><div class="card-title">Cuenta de resultados · 2025</div><div id="results-row" style="display:flex;margin-top:12px;border-radius:8px;overflow:hidden;border:1px solid var(--border)"></div></div>
+      <div class="card"><div class="card-title" id="results-title">Cuenta de resultados</div><div id="results-row" style="display:flex;margin-top:12px;border-radius:8px;overflow:hidden;border:1px solid var(--border)"></div></div>
+      <div id="chart-comparison-wrap" style="display:none">
+        <div id="kpi-comparison" style="margin-bottom:14px"></div>
+        <div class="card"><div class="card-title">📈 Comparativa anual — Ingresos mensuales</div><div class="card-sub">Todos los años disponibles en tu base de datos</div><canvas id="chart-comparison" height="100"></canvas></div>
+      </div>
     </div>
 
     <!-- RESERVAS -->
@@ -447,7 +454,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── STATE ──────────────────────────────────────────────────────────
 let allReservas=[], allGastos=[], allApartments=[], allLarga=[];
-let aptFilter='todos', platFilter='todas', estFilter='todas', charts={};
+let aptFilter='todos', platFilter='todas', estFilter='todas', yearFilter='todos', charts={};
 const MESES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const MESES_FULL=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const PLAT_COLOR={Booking:'#003B95',Airbnb:'#FF5A5F',Particular:'#00B894',Otro:'#888'};
@@ -502,6 +509,38 @@ function buildSidebar(){
   // Poblar selects de apartamentos en modales
   const opts=allApartments.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
   ['res-apt','gasto-apt','lt-apt'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
+  buildYearFilter();
+}
+
+function buildYearFilter(){
+  // Detectar años disponibles en los datos
+  const years=new Set(allReservas.map(r=>new Date(r.check_in).getFullYear()).filter(y=>!isNaN(y)));
+  allGastos.forEach(g=>years.add(new Date(g.expense_date).getFullYear()));
+  const sortedYears=[...years].sort((a,b)=>b-a);
+  const sel=document.getElementById('year-filter');
+  sel.innerHTML=`<option value="todos">Todos los años</option>`+sortedYears.map(y=>`<option value="${y}">${y}</option>`).join('');
+  // Seleccionar el año más reciente por defecto
+  if(sortedYears.length>0 && yearFilter==='todos'){
+    sel.value=sortedYears[0];
+    yearFilter=String(sortedYears[0]);
+  } else {
+    sel.value=yearFilter;
+  }
+  updatePageTitle();
+}
+
+function setYearFilter(y){
+  yearFilter=y;
+  updatePageTitle();
+  renderCurrentPage();
+}
+
+function updatePageTitle(){
+  const PAGE_TITLES={dashboard:'📊 Resumen',reservas:'📋 Reservas',importar:'📥 Importar CSV',gastos:'💰 Gastos',calendario:'📅 Ocupación',larga:'🌙 Larga Temporada'};
+  const active=document.querySelector('.page.active')?.id?.replace('page-','');
+  const base=PAGE_TITLES[active]||'📊 Resumen';
+  const ySuffix=yearFilter==='todos'?'· Todos los años':'· '+yearFilter;
+  document.getElementById('page-title').textContent=base+' '+ySuffix;
 }
 
 // ── FILTROS ────────────────────────────────────────────────────────
@@ -516,6 +555,7 @@ function setPlatFilter(p,btn){platFilter=p;document.querySelectorAll('.fp').forE
 function setEstFilter(e,btn){estFilter=e;document.querySelectorAll('.fp').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderReservas();}
 function filteredRes(){
   return allReservas.filter(r=>{
+    if(yearFilter!=='todos'&&new Date(r.check_in).getFullYear()!==parseInt(yearFilter))return false;
     if(aptFilter!=='todos'&&r.apartments?.short_code!==aptFilter)return false;
     if(platFilter!=='todas'&&r.platform!==platFilter)return false;
     if(estFilter!=='todas'&&r.status!==estFilter)return false;
@@ -535,7 +575,7 @@ function showPage(name){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   document.getElementById('nav-'+name).classList.add('active');
-  document.getElementById('page-title').textContent=PAGE_TITLES[name];
+  updatePageTitle();
   renderCurrentPage(name);
 }
 function renderCurrentPage(name){
@@ -867,7 +907,7 @@ function cancelCSV(){document.getElementById('csv-preview').style.display='none'
 
 // ── RENDER DASHBOARD ───────────────────────────────────────────────
 function renderDashboard(){
-  const res=allReservas.filter(r=>aptFilter==='todos'||r.apartments?.short_code===aptFilter);
+  const res=allReservas.filter(r=>(yearFilter==='todos'||new Date(r.check_in).getFullYear()===parseInt(yearFilter))&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter));
   const ok=res.filter(r=>r.status==='confirmed');
   const bruto=ok.reduce((s,r)=>s+(+r.gross_amount||0),0);
   const neto=ok.reduce((s,r)=>s+(+r.net_income||0),0);
@@ -900,11 +940,72 @@ function renderDashboard(){
   const tot=chV.reduce((s,v)=>s+v,0);
   document.getElementById('channel-legend').innerHTML=chL.map((l,i)=>`<div style="display:flex;align-items:center;gap:7px;font-size:11px"><div style="width:9px;height:9px;border-radius:50%;background:${chC[i]}"></div><span style="color:var(--muted);flex:1">${l}</span><strong>${tot>0?((chV[i]/tot)*100).toFixed(0):0}%</strong></div>`).join('');
 
-  const gas=allGastos.filter(g=>aptFilter==='todos'||g.apartments?.short_code===aptFilter);
+  const gas=allGastos.filter(g=>(yearFilter==='todos'||new Date(g.expense_date).getFullYear()===parseInt(yearFilter))&&(aptFilter==='todos'||g.apartments?.short_code===aptFilter));
   const tGas=gas.reduce((s,g)=>s+(+g.amount||0),0);
   const netas=bruto-comis-tGas;
   const items=[{l:'Ingresos brutos',v:bruto,c:'#6C5CE7'},{l:'Comisiones',v:-comis,c:'#E24B4A'},{l:'Ingr. s/comisiones',v:bruto-comis,c:'var(--text)'},{l:'Gastos operativos',v:-tGas,c:'#E24B4A'},{l:'Resultado bruto',v:netas,c:'#00B894'},{l:'IRPF (~14%)',v:-(netas*0.14),c:'#E24B4A'},{l:'Resultado final',v:netas*0.86,c:'#00B894'}];
   document.getElementById('results-row').innerHTML=items.map((it,i)=>`<div style="flex:1;padding:12px 10px;background:${i===items.length-1?'#00B89415':i%2===0?'#f9fafb':'#fff'};border-right:1px solid var(--border);display:flex;flex-direction:column;gap:5px"><div style="font-size:10px;color:var(--muted);line-height:1.3">${it.l}</div><div style="font-size:13px;font-weight:800;color:${it.c};letter-spacing:-.3px">${fmt(Math.abs(it.v))}</div></div>`).join('');
+
+  // Gráfica comparativa anual (solo si hay varios años)
+  renderYearComparison();
+}
+
+function renderYearComparison(){
+  const allYears=[...new Set(allReservas.map(r=>new Date(r.check_in).getFullYear()).filter(y=>!isNaN(y)))].sort();
+  if(allYears.length<2){
+    const el=document.getElementById('chart-comparison-wrap');
+    if(el)el.style.display='none';
+    return;
+  }
+  const el=document.getElementById('chart-comparison-wrap');
+  if(el)el.style.display='block';
+
+  const YEAR_COLORS=['#6C5CE7','#00B894','#FDCB6E','#E17055','#74B9FF'];
+  const datasets=allYears.map((y,i)=>{
+    const monthly=Array(12).fill(0);
+    allReservas.filter(r=>new Date(r.check_in).getFullYear()===y&&r.status==='confirmed'&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter))
+      .forEach(r=>{monthly[new Date(r.check_in).getMonth()]+=+r.gross_amount||0;});
+    return{label:String(y),data:monthly,borderColor:YEAR_COLORS[i%YEAR_COLORS.length],backgroundColor:YEAR_COLORS[i%YEAR_COLORS.length]+'20',fill:false,tension:.4,pointRadius:3};
+  });
+
+  if(charts.comparison)charts.comparison.destroy();
+  const ctx=document.getElementById('chart-comparison');
+  if(!ctx)return;
+  charts.comparison=new Chart(ctx.getContext('2d'),{
+    type:'line',
+    data:{labels:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],datasets},
+    options:{plugins:{legend:{display:true,position:'top',labels:{font:{size:11}}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f3f4f6'},ticks:{callback:v=>`${(v/1000).toFixed(0)}k€`}}},responsive:true}
+  });
+
+  // KPIs comparativos año actual vs anterior
+  const currentYear=yearFilter==='todos'?Math.max(...allYears):parseInt(yearFilter);
+  const prevYear=currentYear-1;
+  const resCurrentYear=allReservas.filter(r=>new Date(r.check_in).getFullYear()===currentYear&&r.status==='confirmed'&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter));
+  const resPrevYear=allReservas.filter(r=>new Date(r.check_in).getFullYear()===prevYear&&r.status==='confirmed'&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter));
+  const brutoC=resCurrentYear.reduce((s,r)=>s+(+r.gross_amount||0),0);
+  const brutoP=resPrevYear.reduce((s,r)=>s+(+r.gross_amount||0),0);
+  const diff=brutoP>0?((brutoC-brutoP)/brutoP*100):null;
+  const diffStr=diff===null?'Sin datos año anterior':diff>=0?`▲ +${diff.toFixed(1)}% vs ${prevYear}`:`▼ ${diff.toFixed(1)}% vs ${prevYear}`;
+  const diffColor=diff===null?'var(--muted)':diff>=0?'#00B894':'#E24B4A';
+  const kpiComp=document.getElementById('kpi-comparison');
+  if(kpiComp) kpiComp.innerHTML=`
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      ${allYears.map((y,i)=>{
+        const resY=allReservas.filter(r=>new Date(r.check_in).getFullYear()===y&&r.status==='confirmed'&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter));
+        const b=resY.reduce((s,r)=>s+(+r.gross_amount||0),0);
+        const n=resY.reduce((s,r)=>s+(+r.net_income||0),0);
+        return`<div class="kpi-card" style="border-left:3px solid ${YEAR_COLORS[i%YEAR_COLORS.length]}">
+          <div class="kpi-label">${y}</div>
+          <div class="kpi-value" style="color:${YEAR_COLORS[i%YEAR_COLORS.length]}">${fmt(b)}</div>
+          <div class="kpi-sub">${resY.length} reservas · neto ${fmt(n)}</div>
+        </div>`;
+      }).join('')}
+      <div class="kpi-card" style="border-left:3px solid var(--muted)">
+        <div class="kpi-label">Variación ${currentYear} vs ${prevYear}</div>
+        <div class="kpi-value" style="font-size:18px;color:${diffColor}">${diffStr}</div>
+        <div class="kpi-sub">Ingresos brutos</div>
+      </div>
+    </div>`;
 }
 
 // ── RENDER RESERVAS ────────────────────────────────────────────────
@@ -987,7 +1088,7 @@ function renderCalendario(){
     return`<div style="margin-bottom:20px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span class="tag ${aptClass(a)}">${a}</span><span style="font-size:13px;font-weight:700">${allApartments.find(ap=>ap.short_code===a)?.name||a}</span><span style="font-size:11px;color:var(--muted);margin-left:auto">Media: ${media}%</span></div><div class="ocup-grid">${MESES.map((m,i)=>{const p=d[i],c=gc(p);return`<div class="ocup-cell"><div class="ocup-bar" style="background:${c}18;border:1px solid ${c}40"><div class="ocup-fill" style="height:${p}%;background:${c}30"></div><span class="ocup-pct" style="color:${c}">${p}%</span></div><div class="ocup-mes">${m}</div></div>`;}).join('')}</div></div>`;
   }).join('');
 
-  const ok=allReservas.filter(r=>(aptFilter==='todos'||r.apartments?.short_code===aptFilter)&&r.status==='confirmed');
+  const ok=allReservas.filter(r=>(yearFilter==='todos'||new Date(r.check_in).getFullYear()===parseInt(yearFilter))&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter)&&r.status==='confirmed');
   const mTOR=Array(12).fill(0),mBEL=Array(12).fill(0);
   ok.forEach(r=>{const m=new Date(r.check_in).getMonth();if(r.apartments?.short_code==='TOR')mTOR[m]+=+r.gross_amount||0;else mBEL[m]+=+r.gross_amount||0;});
   if(charts.season)charts.season.destroy();
