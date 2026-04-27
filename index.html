@@ -768,68 +768,89 @@ function processCSV(file){
 }
 
 function parseCSV(text){
+  // Detectar separador: ; o ,
+  const firstLine=text.split('\n')[0];
+  const sep=firstLine.split(';').length>firstLine.split(',').length?';':',';
   const lines=text.trim().split('\n').filter(l=>l.trim());
-  const headers=lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,'').toLowerCase());
+  const headers=lines[0].split(sep).map(h=>h.trim().replace(/^"|"$/g,'').toLowerCase());
   const rows=lines.slice(1).map(line=>{
     const vals=[];let cur='',inQ=false;
-    for(const ch of line){if(ch==='"')inQ=!inQ;else if(ch===','&&!inQ){vals.push(cur.trim());cur='';}else cur+=ch;}
+    for(const ch of line){if(ch==='"')inQ=!inQ;else if(ch===sep&&!inQ){vals.push(cur.trim());cur='';}else cur+=ch;}
     vals.push(cur.trim());
     return Object.fromEntries(headers.map((h,i)=>[h,vals[i]?.replace(/^"|"$/g,'')||'']));
   });
 
-  // Detectar plataforma y mapear columnas
-  let platform='CSV Genérico', mapped=[];
+  let platform='CSV Genérico',mapped=[];
   const h=headers.join(' ');
 
-  if(h.includes('número de reserva')||h.includes('reservation id')||h.includes('booker name')){
+  // ── BOOKING.COM ──────────────────────────────────────────────────
+  // Columnas: reservation number, booker name, arrival, departure, original amount, commission %, status, property name
+  if(h.includes('booker name')||h.includes('reservation number')||h.includes('property name')){
     platform='Booking.com';
-    mapped=rows.map(r=>({
-      guest_name:r['booker name']||r['nombre del cliente']||r['guest name']||'',
-      check_in:parseDate(r['check-in']||r['fecha de entrada']||r['arrival date']||''),
-      check_out:parseDate(r['check-out']||r['fecha de salida']||r['departure date']||''),
-      gross_amount:parseAmount(r['price']||r['precio']||r['total price']||r['total']||'0'),
-      platform_commission:parseAmount(r['commission']||r['comisión']||'0'),
-      platform:'Booking',status:'confirmed',
-    }));
-  } else if(h.includes('confirmation code')||h.includes('código de confirmación')){
+    mapped=rows.map(r=>{
+      const gross=parseBookingAmount(r['original amount']||r['original_amount']||'0');
+      const commPct=parseFloat(r['commission %']||r['commission%']||r['comisión %']||'0')||0;
+      const comm=parseFloat((gross*commPct/100).toFixed(2));
+      const status=(r['status']||r['estado']||'').toUpperCase()==='OK'?'confirmed':'cancelled';
+      return{
+        guest_name:r['booker name']||r['guest name']||r['nombre del cliente']||'',
+        check_in:parseDate(r['arrival']||r['llegada']||r['check-in']||''),
+        check_out:parseDate(r['departure']||r['salida']||r['check-out']||''),
+        gross_amount:gross,
+        platform_commission:comm,
+        cleaning_fee:20,
+        platform:'Booking',
+        status,
+        notes:r['property name']?`Propiedad: ${r['property name']}`:'',
+      };
+    }).filter(r=>r.gross_amount>0||r.status==='cancelled');
+
+  // ── AIRBNB ────────────────────────────────────────────────────────
+  } else if(h.includes('confirmation code')||h.includes('código de confirmación')||h.includes('gross earnings')){
     platform='Airbnb';
     mapped=rows.map(r=>({
       guest_name:r['guest name']||r['nombre del huésped']||r['guest']||'',
       check_in:parseDate(r['start date']||r['fecha de inicio']||r['check-in']||''),
       check_out:parseDate(r['end date']||r['fecha de fin']||r['check-out']||''),
       gross_amount:parseAmount(r['amount']||r['gross earnings']||r['earnings']||r['importe']||'0'),
-      platform_commission:parseAmount(r['host fee']||r['service fee']||'0'),
-      platform:'Airbnb',status:'confirmed',
+      platform_commission:parseAmount(r['host fee']||r['service fee']||r['airbnb service fee']||'0'),
+      cleaning_fee:20,platform:'Airbnb',status:'confirmed',
     }));
+
+  // ── GENÉRICO ──────────────────────────────────────────────────────
   } else {
-    // Genérico
     mapped=rows.map(r=>({
-      guest_name:r['huesped']||r['guest']||r['nombre']||'',
-      check_in:parseDate(r['check_in']||r['entrada']||''),
-      check_out:parseDate(r['check_out']||r['salida']||''),
-      gross_amount:parseAmount(r['importe']||r['gross_amount']||'0'),
+      guest_name:r['huesped']||r['guest']||r['nombre']||r['guest name']||'',
+      check_in:parseDate(r['check_in']||r['entrada']||r['arrival']||''),
+      check_out:parseDate(r['check_out']||r['salida']||r['departure']||''),
+      gross_amount:parseAmount(r['importe']||r['gross_amount']||r['amount']||'0'),
       platform_commission:parseAmount(r['comision']||r['commission']||'0'),
-      cleaning_fee:parseAmount(r['limpieza']||r['cleaning_fee']||'0'),
+      cleaning_fee:parseAmount(r['limpieza']||r['cleaning_fee']||'20'),
       other_expenses:parseAmount(r['otros_gastos']||'0'),
       platform:r['plataforma']||r['platform']||'Particular',
-      status:r['estado']||r['status']||'confirmed',
+      status:(r['estado']||r['status']||'confirmed').toLowerCase().includes('cancel')?'cancelled':'confirmed',
       notes:r['observaciones']||r['notes']||'',
     }));
   }
   return{rows,platform,mapped:mapped.filter(r=>r.guest_name&&r.check_in&&r.check_out)};
 }
 
+// Parser de importes Booking.com: elimina puntos de miles, divide entre 1000
+function parseBookingAmount(s){
+  if(!s)return 0;
+  const clean=String(s).trim().replace(/\./g,'').replace(',','');
+  const n=parseInt(clean,10);
+  return isNaN(n)?0:n/1000;
+}
+
 function parseDate(s){
   if(!s)return'';s=s.trim();
-  // DD/MM/YYYY
-  const d1=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
-  if(d1){const[,d,m,y]=d1;return`${y.length===2?'20'+y:y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;}
-  // MM/DD/YYYY americano
-  const d2=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if(d2){const[,m,d,y]=d2;return`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;}
+  if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.substring(0,10); // ya en formato ISO
+  const m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(m){const[,d,mo,y]=m;return`${y.length===2?'20'+y:y}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}`;}
   return s;
 }
-function parseAmount(s){return parseFloat(String(s).replace(/[€$£\s]/g,'').replace(',','.').trim())||0;}
+function parseAmount(s){return parseFloat(String(s).replace(/[€$£\s]/g,'').replace(/\./g,'').replace(',','.'))||0;}
 
 async function importCSVRows(mapped){
   const aptId=document.getElementById('csv-apt-sel').value;
