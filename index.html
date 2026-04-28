@@ -10,7 +10,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --purple:#D97706;--green:#059669;--red:#DC2626;--amber:#CA8A04;
-  --bg:#E8E6E1;--card:#F0EDE8;--border:#D1CEC8;--text:#1C1917;--muted:#57534E
+  --bg:#D4D0C8;--card:#FFFFFF;--border:#C8C4BC;--text:#1C1917;--muted:#57534E
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 /* LOGIN */
@@ -28,7 +28,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--purple)}
 .error-msg{font-size:12px;color:var(--red);text-align:center}
 /* APP */
 #app-view{display:none;flex-direction:row;min-height:100vh}
-.sidebar{width:210px;background:#F5F2ED;border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0}
+.sidebar{width:210px;background:#EDEAE4;border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0}
 .sidebar-brand{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
 nav{flex:1;padding:10px 8px}
 .nav-btn{width:100%;padding:9px 10px;background:transparent;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted);text-align:left;margin-bottom:2px;transition:all .15s}
@@ -39,7 +39,7 @@ nav{flex:1;padding:10px 8px}
 .apt-badge{flex:1;min-width:40px;border-radius:6px;padding:4px;text-align:center;font-size:9px;font-weight:700}
 .btn-logout{width:100%;padding:7px;background:transparent;border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted);cursor:pointer}
 .main{flex:1;display:flex;flex-direction:column;min-width:0;overflow-x:hidden}
-.topbar{background:#EAE7E1;border-bottom:1px solid var(--border);padding:13px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;flex-wrap:wrap}
+.topbar{background:#E2DED8;border-bottom:1px solid var(--border);padding:13px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;flex-wrap:wrap}
 .topbar h2{font-size:14px;font-weight:700;flex:1}
 .filter-btns{display:flex;gap:6px;flex-wrap:wrap}
 .filter-btn{padding:6px 13px;border-radius:7px;border:1px solid var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;transition:all .15s}
@@ -48,15 +48,15 @@ nav{flex:1;padding:10px 8px}
 .page{display:none;padding:20px 24px;flex-direction:column;gap:18px}
 .page.active{display:flex}
 .kpi-row{display:flex;gap:12px;flex-wrap:wrap}
-.kpi-card{background:#FFFFFF;border:1px solid #D1CEC8;border-radius:12px;padding:16px 18px;flex:1;min-width:130px;box-shadow:0 1px 3px #00000010}
+.kpi-card{background:#FFFFFF;border:1px solid #C8C4BC;border-radius:12px;padding:16px 18px;flex:1;min-width:130px;box-shadow:0 2px 12px #00000018}
 .kpi-label{font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.3}
 .kpi-value{font-size:22px;font-weight:800;letter-spacing:-0.5px}
 .kpi-sub{font-size:11px;color:var(--muted);margin-top:5px}
-.card{background:#FFFFFF;border:1px solid #D1CEC8;border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px #00000008}
+.card{background:#FFFFFF;border:1px solid #C8C4BC;border-radius:12px;padding:18px 20px;box-shadow:0 2px 12px #00000018}
 .card-title{font-size:14px;font-weight:700;margin-bottom:4px}
 .card-sub{font-size:11px;color:var(--muted);margin-bottom:14px}
 .flex-row{display:flex;gap:14px;flex-wrap:wrap}
-.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid #D1CEC8;background:#FFFFFF;box-shadow:0 1px 4px #00000008}
+.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid #C8C4BC;background:#FFFFFF;box-shadow:0 2px 12px #00000018}
 table{width:100%;border-collapse:collapse;background:#FFFFFF}
 thead tr{background:var(--card2)}
 th{text-align:left;font-size:10px;color:var(--muted);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
@@ -104,7 +104,7 @@ tr:last-child td{border-bottom:none}
 .legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
 .legend-dot{width:10px;height:10px;border-radius:2px}
 /* LARGA */
-.lt-card{border:1px solid #D1CEC8;border-radius:12px;padding:18px;background:#FFFFFF;box-shadow:0 1px 4px #00000008;display:flex;flex-direction:column;gap:12px;margin-bottom:12px}
+.lt-card{border:1px solid #C8C4BC;border-radius:12px;padding:18px;background:#FFFFFF;box-shadow:0 2px 12px #00000018;display:flex;flex-direction:column;gap:12px;margin-bottom:12px}
 .lt-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .lt-status{margin-left:auto;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600}
 .lt-status.active{background:#00B89420;color:var(--green);border:1px solid #00B89440}
@@ -1187,7 +1187,7 @@ function renderYearComparison(){
         const resY=allReservas.filter(r=>new Date(r.check_in).getFullYear()===y&&r.status==='confirmed'&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter));
         const b=resY.reduce((s,r)=>s+(+r.gross_amount||0),0);
         const n=resY.reduce((s,r)=>s+(+r.net_income||0),0);
-        return`<div class="kpi-card" style="border-left:3px solid ${YEAR_COLORS[i%YEAR_COLORS.length]}">
+        return`<div class="kpi-card" style="border-left:3px solid ${YEAR_COLORS[i%YEAR_COLORS.length]};background:#FFFFFF;box-shadow:0 2px 12px #00000018">
           <div class="kpi-label">${y}</div>
           <div class="kpi-value" style="color:${YEAR_COLORS[i%YEAR_COLORS.length]}">${fmt(b)}</div>
           <div class="kpi-sub">${resY.length} reservas · neto ${fmt(n)}</div>
