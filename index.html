@@ -78,9 +78,9 @@ tr:last-child td{border-bottom:none}
 .stats-row{margin-left:auto;display:flex;gap:12px;font-size:11px;color:var(--muted);flex-wrap:wrap}
 .loading{text-align:center;padding:40px;color:var(--muted);font-size:13px}
 /* MODAL */
-.modal-bg{display:none;position:fixed;inset:0;background:#00000045;z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal-bg{display:none;position:fixed;inset:0;background:#00000045;z-index:100;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
 .modal-bg.open{display:flex}
-.modal{background:#FFFFFF;border-radius:16px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+.modal{background:#FFFFFF;border-radius:16px;padding:28px;width:100%;max-width:520px;display:flex;flex-direction:column;gap:16px}
 .modal-title{font-size:16px;font-weight:700;margin-bottom:4px}
 .form-row{display:flex;gap:12px}
 .form-row>div{flex:1}
@@ -446,7 +446,7 @@ tr:last-child td{border-bottom:none}
         <div style="width:90px;font-size:12px;font-weight:700;color:var(--text)">💡 Luz</div>
         <input type="number" id="pago-luz" step="0.01" placeholder="0.00" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:13px">
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;white-space:nowrap;margin:0">
-          <input type="checkbox" id="pago-luz-paid" style="width:16px;height:16px;cursor:pointer;accent-color:var(--green)">
+          <input type="checkbox" id="pago-luz-cobrada" style="width:16px;height:16px;cursor:pointer;accent-color:var(--green)">
           <span>Cobrada</span>
         </label>
       </div>
@@ -455,7 +455,7 @@ tr:last-child td{border-bottom:none}
         <div style="width:90px;font-size:12px;font-weight:700;color:var(--text)">💧 Agua</div>
         <input type="number" id="pago-agua" step="0.01" placeholder="0.00" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:13px">
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;white-space:nowrap;margin:0">
-          <input type="checkbox" id="pago-agua-paid" style="width:16px;height:16px;cursor:pointer;accent-color:var(--green)">
+          <input type="checkbox" id="pago-agua-cobrada" style="width:16px;height:16px;cursor:pointer;accent-color:var(--green)">
           <span>Cobrada</span>
         </label>
       </div>
@@ -464,7 +464,7 @@ tr:last-child td{border-bottom:none}
         <div style="width:90px;font-size:12px;font-weight:700;color:var(--text)">🌐 Internet</div>
         <input type="number" id="pago-internet" step="0.01" placeholder="0.00" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:13px">
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;white-space:nowrap;margin:0">
-          <input type="checkbox" id="pago-internet-paid" style="width:16px;height:16px;cursor:pointer;accent-color:var(--green)">
+          <input type="checkbox" id="pago-internet-cobrado" style="width:16px;height:16px;cursor:pointer;accent-color:var(--green)">
           <span>Cobrado</span>
         </label>
       </div>
@@ -473,7 +473,7 @@ tr:last-child td{border-bottom:none}
         <div style="width:90px;font-size:12px;font-weight:700;color:var(--text)">📋 Otros</div>
         <input type="number" id="pago-otros" step="0.01" placeholder="0.00" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:13px">
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;white-space:nowrap;margin:0">
-          <input type="checkbox" id="pago-otros-paid" style="width:16px;height:16px;cursor:pointer;accent-color:var(--green)">
+          <input type="checkbox" id="pago-otros-cobrado" style="width:16px;height:16px;cursor:pointer;accent-color:var(--green)">
           <span>Cobrado</span>
         </label>
       </div>
@@ -911,190 +911,26 @@ async function saveLarga(){
 }
 
 // ── MODAL: PAGO LARGA ──────────────────────────────────────────────
-function openModalPago(contractId,renta){
+function openModalPago(contractId,renta,mes,anio){
   document.getElementById('pago-contract-id').value=contractId;
   document.getElementById('pago-importe').value=renta||'';
+  document.getElementById('pago-mes').value=mes||(new Date().getMonth()+1);
+  document.getElementById('pago-anio').value=anio||new Date().getFullYear();
   document.getElementById('pago-fecha').value=new Date().toISOString().split('T')[0];
-  document.getElementById('pago-mes').value=new Date().getMonth()+1;
-  document.getElementById('pago-anio').value=new Date().getFullYear();
-  ['pago-luz','pago-agua','pago-internet','pago-otros'].forEach(id=>document.getElementById(id).value='');
-  ['pago-luz-cobrada','pago-agua-cobrada','pago-internet-cobrado','pago-otros-cobrado'].forEach(id=>document.getElementById(id).value='false');
-  document.getElementById('pago-cobrado').value='false';
-  document.getElementById('pago-notas').value='';
-  openModal('modal-pago');
-}
-async function savePago(){
-  const contractId=document.getElementById('pago-contract-id').value;
-  const luz=+document.getElementById('pago-luz').value||0;
-  const agua=+document.getElementById('pago-agua').value||0;
-  const inet=+document.getElementById('pago-internet').value||0;
-  const otros=+document.getElementById('pago-otros').value||0;
-  const notesBase=document.getElementById('pago-notas').value;
-  const utilNotes=[
-    luz>0?`Luz: ${luz}€ (${document.getElementById('pago-luz-cobrada').value==='true'?'✓ cobrada':'⏳ pendiente'})`:null,
-    agua>0?`Agua: ${agua}€ (${document.getElementById('pago-agua-cobrada').value==='true'?'✓ cobrada':'⏳ pendiente'})`:null,
-    inet>0?`Internet: ${inet}€ (${document.getElementById('pago-internet-cobrado').value==='true'?'✓ cobrado':'⏳ pendiente'})`:null,
-    otros>0?`Otros: ${otros}€ (${document.getElementById('pago-otros-cobrado').value==='true'?'✓ cobrado':'⏳ pendiente'})`:null,
-  ].filter(Boolean).join(' · ');
-  const data={
-    contract_id:contractId,
-    month:+document.getElementById('pago-mes').value,
-    year:+document.getElementById('pago-anio').value,
-    amount:+document.getElementById('pago-importe').value||0,
-    paid:document.getElementById('pago-cobrado').value==='true',
-    paid_on:document.getElementById('pago-fecha').value||null,
-    notes:[notesBase,utilNotes].filter(Boolean).join(' | '),
-  };
-  const{error}=await sb.from('long_term_payments').insert(data);
-  if(error){alert('Error: '+error.message);return;}
-  closeModal('modal-pago');await loadData();renderLarga();
-}
-
-// ── CSV IMPORT ─────────────────────────────────────────────────────
-function csvDragOver(e){e.preventDefault();document.getElementById('csv-drop').classList.add('over');}
-function csvDragLeave(){document.getElementById('csv-drop').classList.remove('over');}
-function csvDrop(e){e.preventDefault();csvDragLeave();const f=e.dataTransfer.files[0];if(f)processCSV(f);}
-function csvFileSelected(e){const f=e.target.files[0];if(f)processCSV(f);}
-
-function processCSV(file){
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const text=e.target.result;
-    const{rows,platform,mapped}=parseCSV(text);
-    const prev=document.getElementById('csv-preview');
-    prev.style.display='block';
-    prev.innerHTML=`<strong>Detectado: ${platform}</strong> · ${rows.length} filas · ${mapped.length} reservas válidas<br><br>`+
-      mapped.slice(0,3).map(r=>`• ${r.guest_name} | ${r.check_in} → ${r.check_out} | ${fmtD(r.gross_amount)}`).join('<br>')+
-      (mapped.length>3?`<br>... y ${mapped.length-3} más`:'');
-    const res=document.getElementById('csv-result');
-    res.style.display='block';
-    res.innerHTML=`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-      <span style="font-size:13px;color:var(--muted)">¿Importar <strong>${mapped.length} reservas</strong> de <strong>${platform}</strong>?</span>
-      <select id="csv-apt-sel" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;width:auto">
-        ${allApartments.map(a=>`<option value="${a.id}">${a.name}</option>`).join('')}
-      </select>
-      <button class="btn btn-green" onclick="importCSVRows(${JSON.stringify(mapped).replace(/"/g,'&quot;')})">✓ Importar</button>
-      <button class="btn btn-outline" onclick="cancelCSV()">Cancelar</button>
-    </div>`;
-  };
-  reader.readAsText(file,'UTF-8');
-}
-
-function parseCSV(text){
-  // Detectar separador: ; o ,
-  const firstLine=text.split('\n')[0];
-  const sep=firstLine.split(';').length>firstLine.split(',').length?';':',';
-  const lines=text.trim().split('\n').filter(l=>l.trim());
-  const headers=lines[0].split(sep).map(h=>h.trim().replace(/^"|"$/g,'').toLowerCase());
-  const rows=lines.slice(1).map(line=>{
-    const vals=[];let cur='',inQ=false;
-    for(const ch of line){if(ch==='"')inQ=!inQ;else if(ch===sep&&!inQ){vals.push(cur.trim());cur='';}else cur+=ch;}
-    vals.push(cur.trim());
-    return Object.fromEntries(headers.map((h,i)=>[h,vals[i]?.replace(/^"|"$/g,'')||'']));
+  // Limpiar campos numéricos
+  ['pago-luz','pago-agua','pago-internet','pago-otros'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
   });
-
-  let platform='CSV Genérico',mapped=[];
-  const h=headers.join(' ');
-
-  // ── BOOKING.COM ──────────────────────────────────────────────────
-  // Columnas: reservation number, booker name, arrival, departure, original amount, commission %, status, property name
-  if(h.includes('booker name')||h.includes('reservation number')||h.includes('property name')){
-    platform='Booking.com';
-    mapped=rows.map(r=>{
-      const gross=parseBookingAmount(r['original amount']||r['original_amount']||'0');
-      const commPct=parseFloat(r['commission %']||r['commission%']||r['comisión %']||'0')||0;
-      const comm=parseFloat((gross*commPct/100).toFixed(2));
-      const status=(r['status']||r['estado']||'').toUpperCase()==='OK'?'confirmed':'cancelled';
-      return{
-        guest_name:r['booker name']||r['guest name']||r['nombre del cliente']||'',
-        check_in:parseDate(r['arrival']||r['llegada']||r['check-in']||''),
-        check_out:parseDate(r['departure']||r['salida']||r['check-out']||''),
-        gross_amount:gross,
-        platform_commission:comm,
-        cleaning_fee:20,
-        platform:'Booking',
-        status,
-        notes:r['property name']?`Propiedad: ${r['property name']}`:'',
-      };
-    }).filter(r=>r.gross_amount>0||r.status==='cancelled');
-
-  // ── AIRBNB ────────────────────────────────────────────────────────
-  // Columnas: Type, Confirmation code, Start date, End date, Guest, Listing, Gross earnings, Service fee, Cleaning fee
-  // Solo importar filas tipo "Reservation" (ignorar "Payout")
-  } else if(h.includes('confirmation code')||h.includes('gross earnings')||h.includes('listing')){
-    platform='Airbnb';
-    mapped=rows
-      .filter(r=>(r['type']||r['tipo']||'').toLowerCase().includes('reservation'))
-      .map(r=>({
-        guest_name:r['guest']||r['guest name']||r['huesped']||r['huésped']||'',
-        check_in:parseDate(r['start date']||r['fecha de inicio']||''),
-        check_out:parseDate(r['end date']||r['fecha de fin']||''),
-        gross_amount:parseFloat(r['gross earnings']||r['amount']||'0')||0,
-        platform_commission:parseFloat(r['service fee']||r['host fee']||'0')||0,
-        cleaning_fee:parseFloat(r['cleaning fee']||'0')||20,
-        platform:'Airbnb',
-        status:'confirmed',
-        external_id:r['confirmation code']||'',
-        notes:r['listing']?'Alojamiento: '+r['listing']:'',
-      }))
-      .filter(r=>r.guest_name&&r.check_in&&r.check_out);
-
-  // ── GENÉRICO ──────────────────────────────────────────────────────
-  } else {
-    mapped=rows.map(r=>({
-      guest_name:r['huesped']||r['guest']||r['nombre']||r['guest name']||'',
-      check_in:parseDate(r['check_in']||r['entrada']||r['arrival']||''),
-      check_out:parseDate(r['check_out']||r['salida']||r['departure']||''),
-      gross_amount:parseAmount(r['importe']||r['gross_amount']||r['amount']||'0'),
-      platform_commission:parseAmount(r['comision']||r['commission']||'0'),
-      cleaning_fee:parseAmount(r['limpieza']||r['cleaning_fee']||'20'),
-      other_expenses:parseAmount(r['otros_gastos']||'0'),
-      platform:r['plataforma']||r['platform']||'Particular',
-      status:(r['estado']||r['status']||'confirmed').toLowerCase().includes('cancel')?'cancelled':'confirmed',
-      notes:r['observaciones']||r['notes']||'',
-    }));
-  }
-  return{rows,platform,mapped:mapped.filter(r=>r.guest_name&&r.check_in&&r.check_out)};
-}
-
-// Parser de importes Booking.com: elimina puntos de miles, divide entre 1000
-function parseBookingAmount(s){
-  if(!s)return 0;
-  const clean=String(s).trim().replace(/\./g,'').replace(',','');
-  const n=parseInt(clean,10);
-  return isNaN(n)?0:n/1000;
-}
-
-function parseDate(s){
-  if(!s)return'';s=s.trim();
-  if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.substring(0,10);
-  const m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
-  if(m){
-    const[,a,b,y]=m;
-    const year=y.length===2?'20'+y:y;
-    // Si el segundo número >12: formato MM/DD/YYYY (americano - Airbnb)
-    // Si el primero >12: formato DD/MM/YYYY (europeo - Booking)
-    // Si ambos <=12: asumimos DD/MM/YYYY por defecto
-    if(parseInt(b)>12){
-      return`${year}-${a.padStart(2,'0')}-${b.padStart(2,'0')}`;
-    } else {
-      return`${year}-${b.padStart(2,'0')}-${a.padStart(2,'0')}`;
-    }
-  }
-  return s;
-}
-function parseAmount(s){return parseFloat(String(s).replace(/[€$£\s]/g,'').replace(/\./g,'').replace(',','.'))||0;}
-
-async function importCSVRows(mapped){
-  const aptId=document.getElementById('csv-apt-sel').value;
-  if(!aptId){alert('Selecciona un apartamento');return;}
-  const rows=mapped.map(r=>({...r,apartment_id:aptId,cleaning_fee:r.cleaning_fee||20}));
-  const{error}=await sb.from('reservations').insert(rows);
-  if(error){alert('Error importando: '+error.message);return;}
-  document.getElementById('csv-preview').style.display='none';
-  document.getElementById('csv-result').innerHTML=`<div style="background:#00B89415;border:1px solid #00B89440;border-radius:8px;padding:12px 16px;font-size:13px;color:#00B894">✓ ${rows.length} reservas importadas correctamente</div>`;
-  document.getElementById('csv-input').value='';
-  await loadData();
+  // Limpiar checkboxes (usar .checked=false, NO .value)
+  ['pago-cobrado','pago-luz-cobrada','pago-agua-cobrada','pago-internet-cobrado','pago-otros-cobrado'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.checked=false;
+  });
+  document.getElementById('pago-notas').value='';
+  // Mostrar mes/año en el label
+  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const label=document.getElementById('pago-mes-label');
+  if(label)label.textContent=`📅 ${meses[(document.getElementById('pago-mes').value||1)-1]} ${document.getElementById('pago-anio').value}`;
+  openModal('modal-pago');
 }
 function cancelCSV(){document.getElementById('csv-preview').style.display='none';document.getElementById('csv-result').style.display='none';document.getElementById('csv-input').value='';}
 
