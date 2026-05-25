@@ -200,7 +200,7 @@ tr:last-child td{border-bottom:none}
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Apt</th><th>Huésped</th><th>Canal</th><th>Entrada</th><th>Salida</th><th>Noches</th><th>Bruto</th><th>Comisión</th><th>Limpieza</th><th>Neto</th><th>PV</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>Apt</th><th>Huésped</th><th>Canal</th><th>Entrada</th><th>Salida</th><th>Noches</th><th>Bruto</th><th>Comisión</th><th>Cargo pago</th><th>IVA plat.</th><th>Limpieza</th><th>Neto real</th><th>PV</th><th>Estado</th><th>Acciones</th></tr></thead>
           <tbody id="res-tbody"><tr><td colspan="13" class="loading">Cargando reservas...</td></tr></tbody>
         </table>
       </div>
@@ -320,12 +320,16 @@ tr:last-child td{border-bottom:none}
       <div class="form-group"><label>Fecha salida</label><input type="date" id="res-checkout"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Importe bruto (€)</label><input type="number" id="res-bruto" placeholder="0.00" step="0.01"></div>
-      <div class="form-group"><label>Comisión plataforma (€)</label><input type="number" id="res-comision" placeholder="0.00" step="0.01"></div>
+      <div class="form-group"><label>Importe bruto (€)</label><input type="number" id="res-bruto" placeholder="0.00" step="0.01" oninput="updateNetoPreview()"></div>
+      <div class="form-group"><label>Comisión plataforma (€)</label><input type="number" id="res-comision" placeholder="0.00" step="0.01" oninput="updateNetoPreview()"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Coste limpieza (€)</label><input type="number" id="res-limpieza" placeholder="0.00" step="0.01"></div>
-      <div class="form-group"><label>Otros gastos (€)</label><input type="number" id="res-otros" placeholder="0.00" step="0.01"></div>
+      <div class="form-group"><label>Cargo servicio pagos (€) <span style="font-size:10px;color:var(--muted)">Booking</span></label><input type="number" id="res-payment-fee" placeholder="0.00" step="0.01" oninput="updateNetoPreview()"></div>
+      <div class="form-group"><label>IVA plataforma (€) <span style="font-size:10px;color:var(--muted)">Booking</span></label><input type="number" id="res-platform-vat" placeholder="0.00" step="0.01" oninput="updateNetoPreview()"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Coste limpieza (€)</label><input type="number" id="res-limpieza" placeholder="0.00" step="0.01" oninput="updateNetoPreview()"></div>
+      <div class="form-group"><label>Otros gastos (€)</label><input type="number" id="res-otros" placeholder="0.00" step="0.01" oninput="updateNetoPreview()"></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label>Estado</label>
@@ -764,13 +768,15 @@ function openModalReserva(r=null){
     document.getElementById('res-checkout').value=r.check_out||'';
     document.getElementById('res-bruto').value=r.gross_amount||'';
     document.getElementById('res-comision').value=r.platform_commission||'';
+    const pf=document.getElementById('res-payment-fee');if(pf)pf.value=r.payment_fee||'';
+    const pv2=document.getElementById('res-platform-vat');if(pv2)pv2.value=r.platform_vat||'';
     document.getElementById('res-limpieza').value=r.cleaning_fee||'';
     document.getElementById('res-otros').value=r.other_expenses||'';
     document.getElementById('res-estado').value=r.status||'confirmed';
     document.getElementById('res-pv').value=r.parte_viajero?'true':'false';
     document.getElementById('res-notas').value=r.notes||'';
   } else {
-    ['res-guest','res-checkin','res-checkout','res-bruto','res-comision','res-otros','res-notas'].forEach(id=>document.getElementById(id).value='');
+    ['res-guest','res-checkin','res-checkout','res-bruto','res-comision','res-payment-fee','res-platform-vat','res-otros','res-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.getElementById('res-limpieza').value='20';
     document.getElementById('res-plat').value='Particular';
     document.getElementById('res-estado').value='confirmed';
@@ -783,9 +789,12 @@ function openModalReserva(r=null){
 function updateNetoPreview(){
   const b=+document.getElementById('res-bruto').value||0;
   const c=+document.getElementById('res-comision').value||0;
+  const f=+document.getElementById('res-payment-fee')?.value||0;
+  const v=+document.getElementById('res-platform-vat')?.value||0;
   const l=+document.getElementById('res-limpieza').value||0;
   const o=+document.getElementById('res-otros').value||0;
-  document.getElementById('res-neto-preview').textContent=`Ingreso neto estimado: ${fmtD(b-c-l-o)}`;
+  document.getElementById('res-neto-preview').textContent=
+    `Neto real: ${fmtD(b-c-f-v-l-o)} (bruto ${fmtD(b)} − comis ${fmtD(c)} − cargos ${fmtD(f+v)} − limp ${fmtD(l)})`;
 }
 ['res-bruto','res-comision','res-limpieza','res-otros'].forEach(id=>document.getElementById(id)?.addEventListener('input',updateNetoPreview));
 
@@ -801,6 +810,8 @@ async function saveReserva(){
     check_in:checkin,check_out:checkout,
     gross_amount:+document.getElementById('res-bruto').value||0,
     platform_commission:+document.getElementById('res-comision').value||0,
+    payment_fee:+document.getElementById('res-payment-fee')?.value||0,
+    platform_vat:+document.getElementById('res-platform-vat')?.value||0,
     cleaning_fee:+document.getElementById('res-limpieza').value||0,
     other_expenses:+document.getElementById('res-otros').value||0,
     status:document.getElementById('res-estado').value,
@@ -1042,25 +1053,31 @@ function renderReservas(){
   const res=filteredRes();
   const ok=res.filter(r=>r.status==='confirmed');
   const sumB=ok.reduce((s,r)=>s+(+r.gross_amount||0),0);
-  const sumN=ok.reduce((s,r)=>s+(+r.net_income||0),0);
   const sumC=ok.reduce((s,r)=>s+(+r.platform_commission||0),0);
-  document.getElementById('res-stats').innerHTML=`<span>${res.length} reservas</span><span>Bruto: <strong style="color:#6C5CE7">${fmt(sumB)}</strong></span><span>Comis: <strong style="color:#E24B4A">-${fmt(sumC)}</strong></span><span>Neto: <strong style="color:#00B894">${fmt(sumN)}</strong></span>`;
+  const sumF=ok.reduce((s,r)=>s+(+r.payment_fee||0),0);
+  const sumV=ok.reduce((s,r)=>s+(+r.platform_vat||0),0);
+  const sumN=ok.reduce((s,r)=>s+(+r.gross_amount||0)-(+r.platform_commission||0)-(+r.payment_fee||0)-(+r.platform_vat||0)-(+r.cleaning_fee||0)-(+r.other_expenses||0),0);
+  document.getElementById('res-stats').innerHTML=`<span>${res.length} reservas</span><span>Bruto: <strong style="color:var(--purple)">${fmt(sumB)}</strong></span><span>Comis+cargos: <strong style="color:#DC2626">-${fmt(sumC+sumF+sumV)}</strong></span><span>Neto real: <strong style="color:#059669">${fmt(sumN)}</strong></span>`;
   const tbody=document.getElementById('res-tbody');
   if(!res.length){tbody.innerHTML='<tr><td colspan="13" style="text-align:center;padding:30px;color:var(--muted)">Sin resultados. <a href="#" onclick="openModalReserva();return false">Añade una reserva</a> o <a href="#" onclick="showPage(\'importar\');return false">importa un CSV</a>.</td></tr>';return;}
   tbody.innerHTML=res.map(r=>{
     const apt=r.apartments?.short_code||'?';
     const platClass=r.platform==='Booking'?'tag-booking':r.platform==='Airbnb'?'tag-airbnb':'tag-particular';
     const pv=r.parte_viajero?'<span style="color:#00B894;font-size:14px" title="Parte viajero entregada">✓</span>':'<span style="color:#ccc;font-size:14px" title="Pendiente">○</span>';
+    const payFee=+r.payment_fee||0,platVat=+r.platform_vat||0;
+    const netoReal=r.status==='confirmed'?(+r.gross_amount||0)-(+r.platform_commission||0)-payFee-platVat-(+r.cleaning_fee||0)-(+r.other_expenses||0):0;
     return`<tr style="opacity:${r.status==='cancelled'?.5:1}">
       <td><span class="tag ${aptClass(apt)}">${apt}</span></td>
-      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${r.guest_name}</td>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis">${r.guest_name}</td>
       <td><span class="tag ${platClass}">${r.platform}</span></td>
       <td>${r.check_in}</td><td>${r.check_out}</td>
       <td style="text-align:center;font-weight:600">${r.nights||0}</td>
       <td style="font-weight:700">${fmtD(+r.gross_amount||0)}</td>
-      <td style="color:#E24B4A">${+r.platform_commission>0?'-'+fmtD(+r.platform_commission):'—'}</td>
+      <td style="color:#DC2626">${+r.platform_commission>0?'-'+fmtD(+r.platform_commission):'—'}</td>
+      <td style="color:#E97316;font-size:11px" title="Cargo servicio de pagos Booking">${payFee>0?'-'+fmtD(payFee):'—'}</td>
+      <td style="color:#B45309;font-size:11px" title="IVA servicios plataforma Booking">${platVat>0?'-'+fmtD(platVat):'—'}</td>
       <td style="color:var(--muted)">${fmtD(+r.cleaning_fee||0)}</td>
-      <td style="color:#00B894;font-weight:700">${r.status==='confirmed'?fmtD(+r.net_income||0):'—'}</td>
+      <td style="color:#059669;font-weight:700">${r.status==='confirmed'?fmtD(netoReal):'—'}</td>
       <td style="text-align:center">${pv}</td>
       <td><span class="tag ${r.status==='confirmed'?'tag-ok':'tag-cancel'}">${r.status==='confirmed'?'✓ OK':'✗ Cancelada'}</span></td>
       <td style="display:flex;gap:4px;padding:6px 12px">
@@ -1287,4 +1304,48 @@ async function handleContractUpload(event, contractId){
 init();
 </script>
 </body>
-</html>
+</html>platform='Booking.com';
+    const isStatement=h.includes('cargo por servicio')||h.includes('iva por los servicios')||h.includes('nombre del cliente');
+    if(isStatement){
+      mapped=rows
+        .filter(r=>{const t=(r['tipo']||r['type']||'').toLowerCase();return t.includes('reserva')||t==='';})
+        .map(r=>{
+          const gross=parseFloat(r['importe']||r['amount']||'0')||0;
+          const comm=Math.abs(parseFloat(r['comisión']||r['comision']||r['commission']||'0')||0);
+          const fee=Math.abs(parseFloat(r['cargo por servicio de los pagos']||'0')||0);
+          const vat=Math.abs(parseFloat(r['iva por los servicios de la plataforma online']||'0')||0);
+          const rawStatus=(r['estado de la reserva']||r['status']||'ok').toLowerCase();
+          return{
+            guest_name:r['nombre del cliente']||r['guest name']||'',
+            check_in:parseDateEs(r['check-in']||''),
+            check_out:parseDateEs(r['checkout']||r['check-out']||''),
+            gross_amount:gross,
+            platform_commission:comm,
+            payment_fee:fee,
+            platform_vat:vat,
+            cleaning_fee:20,
+            platform:'Booking',
+            status:rawStatus==='ok'?'confirmed':'cancelled',
+            external_id:String(r['número de reserva']||r['reservation number']||''),
+          };
+        }).filter(r=>r.guest_name&&r.check_in&&r.check_out&&r.gross_amount>0);
+    } else {
+      mapped=rows.map(r=>{
+        const gross=parseBookingAmount(r['original amount']||'0');
+        const commPct=parseFloat(r['commission %']||r['commission%']||'0')||0;
+        const rawStatus=(r['status']||r['estado']||'').toUpperCase();
+        return{
+          guest_name:r['booker name']||r['guest name']||'',
+          check_in:parseDate(r['arrival']||r['llegada']||''),
+          check_out:parseDate(r['departure']||r['salida']||''),
+          gross_amount:gross,
+          platform_commission:parseFloat((gross*commPct/100).toFixed(2)),
+          payment_fee:0,platform_vat:0,
+          cleaning_fee:20,platform:'Booking',
+          status:rawStatus==='OK'?'confirmed':'cancelled',
+          notes:r['property name']?'Propiedad: '+r['property name']:'',
+        };
+      }).filter(r=>r.guest_name&&r.check_in&&r.check_out);
+    }
+
+  
