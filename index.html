@@ -987,20 +987,52 @@ function renderLarga(){
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         ${pays.map(p=>{
           const utilLines=(p.notes||'').split('|').map(s=>s.trim()).filter(Boolean);
-          return`<div class="lt-pay">
-            <div style="font-size:12px;font-weight:700;margin-bottom:5px">${MESES_FULL[(p.month||1)-1]} ${p.year}</div>
+          return`<div class="lt-pay" style="position:relative">
+            <button onclick="deletePago('${p.id}')" style="position:absolute;top:4px;right:4px;background:none;border:none;cursor:pointer;font-size:11px;color:#ccc;line-height:1" title="Eliminar pago">✕</button>
+            <div style="font-size:12px;font-weight:700;margin-bottom:5px;padding-right:16px">${MESES_FULL[(p.month||1)-1]} ${p.year}</div>
             <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--muted)">Renta</span><span style="font-weight:700;color:${p.paid?'#059669':'#DC2626'}">${fmt(+p.amount||0)} ${p.paid?'✓':'⏳'}</span></div>
             ${utilLines.map(line=>{const col=line.includes('✓')?'#059669':'#DC2626';return`<div style="display:flex;justify-content:space-between;font-size:10px;margin-top:2px;border-top:1px dashed var(--border);padding-top:2px"><span style="color:var(--muted)">${line.split(':')[0]}</span><span style="color:${col};font-weight:600">${(line.split(':')[1]||'').trim()}</span></div>`;}).join('')}
           </div>`;
         }).join('')}
         ${lt.status==='active'?`<div class="lt-pay" style="border:2px dashed var(--border);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:12px;min-height:70px" onclick="openModalPago('${lt.id}',${lt.monthly_rent})">+ Pago</div>`:''}
       </div>
-      <div style="display:flex;gap:8px">
+      <div style="display:flex;gap:8px;align-items:center">
         <button class="btn btn-outline btn-sm" onclick='openModalLarga(${JSON.stringify(lt).replace(/'/g,"&#39;")})'>✏️ Editar</button>
+        <button class="btn btn-red btn-sm" onclick="deleteLarga('${lt.id}','${lt.tenant_name.replace(/'/g,'')}')">🗑️ Eliminar</button>
+        <label class="btn btn-outline btn-sm" style="cursor:pointer" title="Adjuntar contrato PDF">
+          📎 ${lt.contract_file_url?'<a href="'+lt.contract_file_url+'" target="_blank" style="color:#047857;text-decoration:none">Ver contrato</a>':'Adjuntar'}
+          <input type="file" accept=".pdf,.doc,.docx,.jpg,.png" style="display:none" onchange="uploadContrato(event,'${lt.id}')">
+        </label>
       </div>
     </div>`;
   }).join('');
 }
+async function deleteLarga(id, nombre){
+  if(!confirm('¿Eliminar el contrato de '+nombre+'? Se eliminarán también todos sus pagos.'))return;
+  await sb.from('long_term_payments').delete().eq('contract_id',id);
+  await sb.from('long_term_contracts').delete().eq('id',id);
+  await loadData();renderLarga();
+}
+
+async function deletePago(id){
+  if(!confirm('¿Eliminar este pago?'))return;
+  await sb.from('long_term_payments').delete().eq('id',id);
+  await loadData();renderLarga();
+}
+
+async function uploadContrato(event, contractId){
+  const file=event.target.files[0];
+  if(!file)return;
+  const ext=file.name.split('.').pop();
+  const path=contractId+'.'+ext;
+  const{error}=await sb.storage.from('contratos').upload(path,file,{upsert:true});
+  if(error){alert('Error subiendo archivo: '+error.message);return;}
+  const{data}=sb.storage.from('contratos').getPublicUrl(path);
+  const{error:e2}=await sb.from('long_term_contracts').update({contract_file_url:data.publicUrl}).eq('id',contractId);
+  if(e2){alert('Error guardando URL: '+e2.message);return;}
+  await loadData();renderLarga();
+}
+
 function openModalLarga(lt=null){
   document.getElementById('modal-larga-title').textContent=lt?'Editar contrato':'Nuevo contrato';
   document.getElementById('lt-id').value=lt?.id||'';
