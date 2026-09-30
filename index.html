@@ -142,7 +142,29 @@ tr:last-child td{border-bottom:none}
   <div class="main">
     <div class="topbar">
       <h2 id="page-title">📊 Resumen</h2>
-      <select id="year-filter" onchange="setYearFilter(this.value)" style="padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-size:11px;font-weight:600;color:#B45309;background:#FEF3C7;border-color:#B45309;outline:none;cursor:pointer"></select>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span style="font-size:11px;color:var(--muted)">Período:</span>
+        <input type="date" id="date-from" onchange="applyDateFilter()" style="padding:5px 8px;border:1px solid var(--border);border-radius:7px;font-size:11px;outline:none;background:var(--card)">
+        <span style="font-size:11px;color:var(--muted)">→</span>
+        <input type="date" id="date-to" onchange="applyDateFilter()" style="padding:5px 8px;border:1px solid var(--border);border-radius:7px;font-size:11px;outline:none;background:var(--card)">
+        <button onclick="clearDateFilter()" style="padding:5px 8px;border:1px solid var(--border);border-radius:7px;font-size:10px;background:transparent;cursor:pointer;color:var(--muted)">✕ Limpiar</button>
+        <select id="quick-period" onchange="applyQuickPeriod(this.value)" style="padding:5px 8px;border:1px solid var(--border);border-radius:7px;font-size:11px;outline:none;background:var(--card);cursor:pointer">
+          <option value="">Período rápido...</option>
+          <option value="this-year">Este año</option>
+          <option value="last-year">Año anterior</option>
+          <option value="this-month">Este mes</option>
+          <option value="last-month">Mes anterior</option>
+          <option value="last-3">Últimos 3 meses</option>
+          <option value="last-6">Últimos 6 meses</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span style="font-size:11px;color:var(--muted)">Comparar con:</span>
+        <input type="date" id="comp-from" onchange="renderDashboard()" style="padding:5px 8px;border:1px solid #B45309;border-radius:7px;font-size:11px;outline:none;background:#FEF3C7">
+        <span style="font-size:11px;color:var(--muted)">→</span>
+        <input type="date" id="comp-to" onchange="renderDashboard()" style="padding:5px 8px;border:1px solid #B45309;border-radius:7px;font-size:11px;outline:none;background:#FEF3C7">
+        <button onclick="clearCompare()" style="padding:5px 8px;border:1px solid #B45309;border-radius:7px;font-size:10px;background:transparent;cursor:pointer;color:#B45309">✕</button>
+      </div>
       <div class="filter-btns" id="apt-filter-btns"></div>
     </div>
 
@@ -174,6 +196,16 @@ tr:last-child td{border-bottom:none}
       <div id="csv-inline" style="display:none">
         <div class="card">
           <div class="card-title">📥 Importar CSV de Booking o Airbnb</div>
+          <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+            <div style="flex:1;background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px;padding:10px 12px">
+              <div style="font-size:11px;font-weight:700;color:#92400E;margin-bottom:4px">📋 Booking.com</div>
+              <div style="font-size:11px;color:#78350F;line-height:1.6">Extranet → <strong>Más</strong> → <strong>Informe de reservas</strong><br>Selecciona período → Descargar CSV</div>
+            </div>
+            <div style="flex:1;background:#FFE4E6;border:1px solid #FECDD3;border-radius:8px;padding:10px 12px">
+              <div style="font-size:11px;font-weight:700;color:#9F1239;margin-bottom:4px">🏠 Airbnb</div>
+              <div style="font-size:11px;color:#881337;line-height:1.6">Menú anfitrión → <strong>Earnings</strong> → <strong>Paid</strong><br>Exportar → CSV</div>
+            </div>
+          </div>
           <div class="csv-drop" id="csv-drop2" onclick="document.getElementById('csv-input2').click()" ondragover="csvDragOver2(event)" ondragleave="csvDragLeave2(event)" ondrop="csvDrop2(event)">
             <input type="file" id="csv-input2" accept=".csv" style="display:none" onchange="csvFileSelected2(event)">
             <div class="icon">📄</div>
@@ -466,6 +498,42 @@ function buildYearFilter(){
   else sel.value=yearFilter;
 }
 function setYearFilter(y){yearFilter=y;renderCurrentPage();}
+
+function applyDateFilter(){
+  const from=document.getElementById('date-from').value;
+  const to=document.getElementById('date-to').value;
+  if(from||to){yearFilter='custom';}
+  document.getElementById('quick-period').value='';
+  renderCurrentPage();
+}
+function clearDateFilter(){
+  document.getElementById('date-from').value='';
+  document.getElementById('date-to').value='';
+  document.getElementById('quick-period').value='';
+  yearFilter='todos';
+  renderCurrentPage();
+}
+function clearCompare(){
+  document.getElementById('comp-from').value='';
+  document.getElementById('comp-to').value='';
+  renderDashboard();
+}
+function applyQuickPeriod(val){
+  if(!val)return;
+  const now=new Date();
+  const y=now.getFullYear(),m=now.getMonth();
+  let from,to;
+  if(val==='this-year'){from=`${y}-01-01`;to=`${y}-12-31`;}
+  else if(val==='last-year'){from=`${y-1}-01-01`;to=`${y-1}-12-31`;}
+  else if(val==='this-month'){from=`${y}-${String(m+1).padStart(2,'0')}-01`;to=new Date(y,m+1,0).toISOString().split('T')[0];}
+  else if(val==='last-month'){const lm=m===0?12:m,ly=m===0?y-1:y;from=`${ly}-${String(lm).padStart(2,'0')}-01`;to=new Date(ly,lm,0).toISOString().split('T')[0];}
+  else if(val==='last-3'){const d=new Date(y,m-3,1);from=d.toISOString().split('T')[0];to=new Date(y,m+1,0).toISOString().split('T')[0];}
+  else if(val==='last-6'){const d=new Date(y,m-6,1);from=d.toISOString().split('T')[0];to=new Date(y,m+1,0).toISOString().split('T')[0];}
+  document.getElementById('date-from').value=from;
+  document.getElementById('date-to').value=to;
+  yearFilter='custom';
+  renderCurrentPage();
+}
 function setAptFilter(apt,btn){
   aptFilter=apt;
   document.querySelectorAll('#apt-filter-btns .filter-btn').forEach(b=>b.className='filter-btn');
@@ -499,25 +567,40 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
 
 function filteredRes(){
+  const dfrom=document.getElementById('date-from')?.value||'';
+  const dto=document.getElementById('date-to')?.value||'';
   return allReservas.filter(r=>{
-    if(yearFilter!=='todos'&&new Date(r.check_in).getFullYear()!==parseInt(yearFilter))return false;
+    if(yearFilter!=='todos'&&yearFilter!=='custom'&&new Date(r.check_in).getFullYear()!==parseInt(yearFilter))return false;
+    if(yearFilter==='custom'){if(dfrom&&r.check_in<dfrom)return false;if(dto&&r.check_in>dto)return false;}
     if(aptFilter!=='todos'&&r.apartments?.short_code!==aptFilter)return false;
     if(resAptFilter!=='todos'&&r.apartments?.short_code!==resAptFilter)return false;
     if(platFilter!=='todas'&&r.platform!==platFilter)return false;
     if(estFilter!=='todas'&&r.status!==estFilter)return false;
     const q=document.getElementById('search-guest')?.value.toLowerCase()||'';
     if(q&&!r.guest_name.toLowerCase().includes(q))return false;
-    const from=document.getElementById('filter-from')?.value,to=document.getElementById('filter-to')?.value;
-    if(from&&r.check_in<from)return false;
-    if(to&&r.check_out>to)return false;
     return true;
   });
 }
 
 // ── DASHBOARD ──────────────────────────────────────────────────────
 function renderDashboard(){
-  const yN=yearFilter==='todos'?new Date().getFullYear():parseInt(yearFilter);
-  const res=allReservas.filter(r=>(yearFilter==='todos'||new Date(r.check_in).getFullYear()===yN)&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter));
+  const dfrom=document.getElementById('date-from')?.value||'';
+  const dto=document.getElementById('date-to')?.value||'';
+  const yN=yearFilter==='todos'?new Date().getFullYear():yearFilter==='custom'?new Date().getFullYear():parseInt(yearFilter);
+  const inPeriod=r=>{
+    if(yearFilter==='custom'){return(!dfrom||r.check_in>=dfrom)&&(!dto||r.check_in<=dto);}
+    return yearFilter==='todos'||new Date(r.check_in).getFullYear()===yN;
+  };
+  const res=allReservas.filter(r=>inPeriod(r)&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter));
+  // Período comparativo
+  const cfrom=document.getElementById('comp-from')?.value||'';
+  const cto=document.getElementById('comp-to')?.value||'';
+  const hasCompare=cfrom&&cto;
+  const inCompare=r=>r.check_in>=cfrom&&r.check_in<=cto&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter);
+  const resComp=hasCompare?allReservas.filter(r=>inCompare(r)&&r.status==='confirmed'):[];
+  const brutoComp=resComp.reduce((s,r)=>s+(+r.gross_amount||0),0);
+  const netoComp=resComp.reduce((s,r)=>s+(+r.gross_amount||0)-(+r.platform_commission||0)-(+r.payment_fee||0)-(+r.platform_vat||0),0);
+  const pct=(v,vc)=>{if(!hasCompare||vc===0)return'';const d=((v-vc)/vc*100);return`<span style="font-size:11px;font-weight:600;color:${d>=0?'#059669':'#DC2626'}">${d>=0?'▲':'▼'} ${Math.abs(d).toFixed(1)}%</span>`;};
   const ok=res.filter(r=>r.status==='confirmed');
   const okTur=ok.filter(r=>['Booking','Airbnb','Particular','Otro'].includes(r.platform));
   // Larga temporada
@@ -530,7 +613,11 @@ function renderDashboard(){
   // Totales
   const bruto=ok.reduce((s,r)=>s+(+r.gross_amount||0),0);
   const neto=ok.reduce((s,r)=>s+(+r.gross_amount||0)-(+r.platform_commission||0)-(+r.payment_fee||0)-(+r.platform_vat||0),0);
-  const gastosFilt=allGastos.filter(g=>(aptFilter==='todos'||g.apartments?.short_code===aptFilter)&&(yearFilter==='todos'||new Date(g.expense_date).getFullYear()===yN));
+  const gastosFilt=allGastos.filter(g=>{
+    if(aptFilter!=='todos'&&g.apartments?.short_code!==aptFilter)return false;
+    if(yearFilter==='custom'){return(!dfrom||g.expense_date>=dfrom)&&(!dto||g.expense_date<=dto);}
+    return yearFilter==='todos'||new Date(g.expense_date).getFullYear()===yN;
+  });
   const totalGastos=gastosFilt.reduce((s,g)=>s+(+g.amount||0),0);
   const brutoTur=okTur.reduce((s,r)=>s+(+r.gross_amount||0),0);
   const nochesTur=okTur.reduce((s,r)=>s+(+r.nights||0),0);
@@ -541,16 +628,17 @@ function renderDashboard(){
   const ocupPct=diasDisp>0?Math.min(100,(nochesTur/diasDisp)*100):0;
   const resultado=neto+ltIngresos-totalGastos;
 
+  const brutoTurComp=resComp.filter(r=>['Booking','Airbnb','Particular','Otro'].includes(r.platform)).reduce((s,r)=>s+(+r.gross_amount||0),0);
   document.getElementById('kpi-row').innerHTML=[
-    {icon:'💰',label:'Ingresos brutos',value:fmt(bruto),sub:ok.length+' reservas confirmadas',color:'var(--text)'},
-    {icon:'✅',label:'Ingresos netos',value:fmt(neto),sub:'Tras comisiones y cargos',color:'#059669'},
-    {icon:'📉',label:'Gastos operativos',value:fmt(totalGastos),sub:gastosFilt.length+' registros',color:'#DC2626'},
-    {icon:'🏖️',label:'Ingresos turísticos',value:fmt(brutoTur),sub:okTur.length+' reservas · Booking/Airbnb/Directo',color:'#D97706'},
-    {icon:'📅',label:'Tarifa media diaria',value:adrTur>0?fmtD(adrTur)+'/noche':'—',sub:nochesTur+' noches turísticas',color:'#B45309'},
-    {icon:'🌙',label:'Ingresos larga temp.',value:ltIngresos>0?fmt(ltIngresos):ltRentaMedia>0?fmt(ltRentaMedia*12)+' est.':'—',sub:ltFilt.length+' contrato(s) · '+fmt(ltRentaMedia)+'/mes',color:'#7C3AED'},
-    {icon:'📊',label:'Ocupación turística',value:ocupPct.toFixed(1)+'%',sub:nochesTur+' noches / '+diasDisp+' disponibles',color:'#047857'},
-    {icon:'🏦',label:'Resultado neto',value:fmt(resultado),sub:'Ingresos netos − gastos',color:resultado>=0?'#059669':'#DC2626'},
-  ].map(k=>`<div class="kpi-card"><div class="kpi-icon">${k.icon}</div><div class="kpi-label">${k.label}</div><div class="kpi-value" style="color:${k.color}">${k.value}</div><div class="kpi-sub">${k.sub}</div></div>`).join('');
+    {icon:'💰',label:'Ingresos brutos',value:fmt(bruto),sub:ok.length+' reservas confirmadas',color:'var(--text)',comp:pct(bruto,brutoComp)},
+    {icon:'✅',label:'Ingresos netos',value:fmt(neto),sub:'Tras comisiones y cargos',color:'#059669',comp:pct(neto,netoComp)},
+    {icon:'📉',label:'Gastos operativos',value:fmt(totalGastos),sub:gastosFilt.length+' registros',color:'#DC2626',comp:''},
+    {icon:'🏖️',label:'Ingresos turísticos',value:fmt(brutoTur),sub:okTur.length+' reservas · Booking/Airbnb/Directo',color:'#D97706',comp:pct(brutoTur,brutoTurComp)},
+    {icon:'📅',label:'Tarifa media diaria',value:adrTur>0?fmtD(adrTur)+'/noche':'—',sub:nochesTur+' noches turísticas',color:'#B45309',comp:''},
+    {icon:'🌙',label:'Ingresos larga temp.',value:ltIngresos>0?fmt(ltIngresos):ltRentaMedia>0?fmt(ltRentaMedia*12)+' est.':'—',sub:ltFilt.length+' contrato(s) · '+fmt(ltRentaMedia)+'/mes',color:'#7C3AED',comp:''},
+    {icon:'📊',label:'Ocupación turística',value:ocupPct.toFixed(1)+'%',sub:nochesTur+' noches / '+diasDisp+' disponibles',color:'#047857',comp:''},
+    {icon:'🏦',label:'Resultado neto',value:fmt(resultado),sub:'Ingresos netos − gastos',color:resultado>=0?'#059669':'#DC2626',comp:pct(resultado,netoComp-0)},
+  ].map(k=>`<div class="kpi-card"><div class="kpi-icon">${k.icon}</div><div class="kpi-label">${k.label}</div><div style="display:flex;align-items:baseline;gap:7px"><div class="kpi-value" style="color:${k.color}">${k.value}</div>${k.comp||''}</div><div class="kpi-sub">${k.sub}</div></div>`).join('');
 
   // Gráfica mensual
   const mTOR=Array(12).fill(0),mBEL=Array(12).fill(0),mEUR=Array(12).fill(0);
@@ -729,7 +817,13 @@ async function deleteReserva(id){if(!confirm('¿Eliminar esta reserva?'))return;
 
 // ── GASTOS ────────────────────────────────────────────────────────────
 function renderGastos(){
-  const gas=allGastos.filter(g=>(aptFilter==='todos'||g.apartments?.short_code===aptFilter)&&(yearFilter==='todos'||new Date(g.expense_date).getFullYear()===parseInt(yearFilter)));
+  const dfromG=document.getElementById('date-from')?.value||'';
+  const dtoG=document.getElementById('date-to')?.value||'';
+  const gas=allGastos.filter(g=>{
+    if(aptFilter!=='todos'&&g.apartments?.short_code!==aptFilter)return false;
+    if(yearFilter==='custom'){return(!dfromG||g.expense_date>=dfromG)&&(!dtoG||g.expense_date<=dtoG);}
+    return yearFilter==='todos'||new Date(g.expense_date).getFullYear()===parseInt(yearFilter);
+  });
   const total=gas.reduce((s,g)=>s+(+g.amount||0),0);
   const yo=gas.filter(g=>g.paid_by==='Propietario').reduce((s,g)=>s+(+g.amount||0),0);
   const bruto=allReservas.filter(r=>(aptFilter==='todos'||r.apartments?.short_code===aptFilter)&&(yearFilter==='todos'||new Date(r.check_in).getFullYear()===parseInt(yearFilter))&&r.status==='confirmed').reduce((s,r)=>s+(+r.gross_amount||0),0);
