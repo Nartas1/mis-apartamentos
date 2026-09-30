@@ -905,9 +905,11 @@ function parseCSV(text){
   });
   let platform='CSV Genérico',mapped=[];
   const h=headers.join(' ');
-  if(h.includes('cargo por servicio')||h.includes('iva por los servicios')||h.includes('nombre del cliente')||h.includes('booker name')||h.includes('original amount')){
+  if(h.includes('cargo por servicio')||h.includes('iva por los servicios')||h.includes('nombre del cliente')||h.includes('reservado por')||h.includes('booker name')||h.includes('original amount')||h.includes('payment fee')){
     platform='Booking.com';
-    const isStatement=h.includes('cargo por servicio')||h.includes('iva por los servicios')||h.includes('nombre del cliente');
+    const isStatement=h.includes('cargo por servicio')||h.includes('iva por los servicios');
+    const isOverview=h.includes('payment fee')&&h.includes('original amount')&&h.includes('booker name');
+    const isReservations=h.includes('reservado por')||h.includes('nombre del cliente (o clientes)')||h.includes('duraci');
     if(isStatement){
       mapped=rows.filter(r=>(r['tipo']||r['type']||'').toLowerCase().includes('reserva')).map(r=>{
         const gross=parseFloat(r['importe']||r['amount']||'0')||0;
@@ -917,7 +919,52 @@ function parseCSV(text){
         const rawStatus=(r['estado de la reserva']||r['status']||'ok').toLowerCase();
         return{guest_name:r['nombre del cliente']||r['guest name']||'',check_in:parseDateEs(r['check-in']||''),check_out:parseDateEs(r['checkout']||r['check-out']||''),gross_amount:gross,platform_commission:comm,payment_fee:fee,platform_vat:vat,cleaning_fee:0,platform:'Booking',status:rawStatus==='ok'?'confirmed':'cancelled',external_id:String(r['\u006e\u00famero de reserva']||r['reservation number']||'')};
       }).filter(r=>r.guest_name&&r.check_in&&r.check_out&&r.gross_amount>0);
+    } else if(isOverview){
+      // Formato: Informe de reservas (reservation_statements_overview) — coma, montos decimales normales
+      mapped=rows.map(r=>{
+        const rawStatus=(r['status']||'ok').toUpperCase();
+        const gross=parseFloat(r['original amount']||r['final amount']||'0')||0;
+        const comm=parseFloat(r['commission amount']||'0')||0;
+        const fee=parseFloat(r['payment fee']||'0')||0;
+        return{
+          guest_name:r['guest name']||r['booker name']||'',
+          check_in:r['arrival']||'',
+          check_out:r['departure']||'',
+          gross_amount:gross,
+          platform_commission:comm,
+          payment_fee:fee,
+          platform_vat:0,
+          cleaning_fee:0,
+          platform:'Booking',
+          status:rawStatus==='OK'?'confirmed':rawStatus.includes('CANCEL')?'cancelled':'confirmed',
+          external_id:r['reservation number']||'',
+          notes:r['property name']?'Propiedad: '+r['property name'].replace(/[^ -]/g,'?'):'',
+        };
+      }).filter(r=>r.guest_name&&r.check_in&&r.check_out&&r.gross_amount>0);
+    } else if(isReservations){
+      // Formato: Reservas Booking (Check-in CSV) — separador ;, precios "22.5 EUR"
+      const parsePrice=s=>{if(!s)return 0;return parseFloat(String(s).replace(/[^0-9.,-]/g,'').replace(',','.'))||0;};
+      mapped=rows.map(r=>{
+        const rawStatus=(r['estado']||r['status']||'ok').toLowerCase();
+        const gross=parsePrice(r['precio']||r['price']||'0');
+        const comm=parsePrice(r['importe de la comisión']||r['commission amount']||'0');
+        const commPct=parseFloat(r['comisión %']||r['commission %']||'0')||0;
+        const nights=parseInt(r['duración (noches)']||r['duration (nights)']||'0')||0;
+        return{
+          guest_name:r['nombre del cliente (o clientes)']||r['nombre del cliente']||r['guest name']||'',
+          check_in:r['entrada']||r['check-in']||r['arrival']||'',
+          check_out:r['salida']||r['check-out']||r['departure']||'',
+          gross_amount:gross,
+          platform_commission:comm||parseFloat((gross*commPct/100).toFixed(2)),
+          payment_fee:0,platform_vat:0,cleaning_fee:0,
+          platform:'Booking',
+          status:rawStatus==='ok'?'confirmed':rawStatus.includes('cancel')?'cancelled':'confirmed',
+          external_id:r['número de reserva']||'',
+          notes:r['comentarios']||'',
+        };
+      }).filter(r=>r.guest_name&&r.check_in&&r.check_out);
     } else {
+      // Formato antiguo: overview con commission %
       mapped=rows.map(r=>{
         const gross=parseBookingAmount(r['original amount']||'0');
         const commPct=parseFloat(r['commission %']||r['commission%']||'0')||0;
