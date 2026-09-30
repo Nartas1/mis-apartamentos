@@ -1138,4 +1138,31 @@ function parseDate(s){
   if(!s)return'';s=s.trim();
   if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.substring(0,10);
   const m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
-  if(m){const[,a,b,y]=m;const year=y.length===2?'20'+y:y;if(parseInt(b
+  if(m){const[,a,b,y]=m;const year=y.length===2?'20'+y:y;if(parseInt(b)>12)return`${year}-${a.padStart(2,'0')}-${b.padStart(2,'0')}`;return`${year}-${b.padStart(2,'0')}-${a.padStart(2,'0')}`;}
+  return s;
+}
+function parseAmount(s){if(!s||s==='-')return 0;const c=String(s).trim().replace(/[€$£\s]/g,'');const n=parseFloat(c);return isNaN(n)?0:n;}
+
+async function importCSVRows(mapped,suffix){
+  const s=suffix||'';
+  const aptId=document.getElementById('csv-apt-sel'+s)?.value;
+  if(!aptId){alert('Selecciona un apartamento');return;}
+  const rows=mapped.map(r=>({...r,apartment_id:aptId,cleaning_fee:0,payment_fee:r.payment_fee||0,platform_vat:r.platform_vat||0}));
+  const{error}=await sb.from('reservations').insert(rows);
+  if(error){alert('Error importando: '+error.message);return;}
+  const prev=document.getElementById('csv-preview'+s);if(prev)prev.style.display='none';
+  const res=document.getElementById('csv-result'+s);
+  if(res)res.innerHTML=`<div style="background:#D1FAE5;border:1px solid #6EE7B7;border-radius:8px;padding:10px 14px;font-size:13px;color:#065F46">✓ ${rows.length} reservas importadas correctamente</div>`;
+  const inp=document.getElementById('csv-input'+s);if(inp)inp.value='';
+  await loadData();renderCurrentPage();
+}
+function cancelCSV(s){
+  const prev=document.getElementById('csv-preview'+(s||''));if(prev)prev.style.display='none';
+  const res=document.getElementById('csv-result'+(s||''));if(res)res.style.display='none';
+  const inp=document.getElementById('csv-input'+(s||''));if(inp)inp.value='';
+}
+
+init();
+</script>
+</body>
+</html>
