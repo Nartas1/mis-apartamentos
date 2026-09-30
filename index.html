@@ -938,7 +938,7 @@ function parseCSV(text){
           platform:'Booking',
           status:rawStatus==='OK'?'confirmed':rawStatus.includes('CANCEL')?'cancelled':'confirmed',
           external_id:r['reservation number']||'',
-          notes:r['property name']?'Propiedad: '+r['property name'].replace(/[^ -]/g,'?'):'',
+          notes:'',
         };
       }).filter(r=>r.guest_name&&r.check_in&&r.check_out&&r.gross_amount>0);
     } else if(isReservations){
