@@ -166,6 +166,12 @@ tr:last-child td{border-bottom:none}
         <button onclick="clearCompare()" style="padding:5px 8px;border:1px solid #B45309;border-radius:7px;font-size:10px;background:transparent;cursor:pointer;color:#B45309">✕</button>
       </div>
       <div class="filter-btns" id="apt-filter-btns"></div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap" id="global-plat-btns">
+        <button class="fp on" onclick="setGlobalPlatFilter('todas',this)">Todos canales</button>
+        <button class="fp" onclick="setGlobalPlatFilter('Booking',this)" style="color:#78350F;border-color:#FCD34D">Booking</button>
+        <button class="fp" onclick="setGlobalPlatFilter('Airbnb',this)" style="color:#BE123C;border-color:#FECDD3">Airbnb</button>
+        <button class="fp" onclick="setGlobalPlatFilter('Particular',this)" style="color:#065F46;border-color:#6EE7B7">Directo</button>
+      </div>
     </div>
 
     <!-- RESUMEN -->
@@ -428,7 +434,7 @@ const SUPABASE_KEY='sb_publishable_ZaF-vnJg6j-Iozi8WoF39w_dHH-wgAi';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let allReservas=[],allGastos=[],allApartments=[],allLarga=[];
-let aptFilter='todos',resAptFilter='todos',platFilter='todas',estFilter='todas',yearFilter='todos',charts={};
+let aptFilter='todos',resAptFilter='todos',platFilter='todas',estFilter='todas',yearFilter='todos',globalPlatFilter='todas',charts={};
 const MESES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const MESES_FULL=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const PLAT_COLOR={Booking:'#78350F',Airbnb:'#BE123C',Particular:'#047857',Otro:'#57534E'};
@@ -534,6 +540,12 @@ function applyQuickPeriod(val){
   yearFilter='custom';
   renderCurrentPage();
 }
+function setGlobalPlatFilter(p,btn){
+  globalPlatFilter=p;
+  document.querySelectorAll('#global-plat-btns .fp').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderCurrentPage();
+}
 function setAptFilter(apt,btn){
   aptFilter=apt;
   document.querySelectorAll('#apt-filter-btns .filter-btn').forEach(b=>b.className='filter-btn');
@@ -575,6 +587,7 @@ function filteredRes(){
     if(aptFilter!=='todos'&&r.apartments?.short_code!==aptFilter)return false;
     if(resAptFilter!=='todos'&&r.apartments?.short_code!==resAptFilter)return false;
     if(platFilter!=='todas'&&r.platform!==platFilter)return false;
+    if(globalPlatFilter!=='todas'&&r.platform!==globalPlatFilter)return false;
     if(estFilter!=='todas'&&r.status!==estFilter)return false;
     const q=document.getElementById('search-guest')?.value.toLowerCase()||'';
     if(q&&!r.guest_name.toLowerCase().includes(q))return false;
@@ -591,7 +604,7 @@ function renderDashboard(){
     if(yearFilter==='custom'){return(!dfrom||r.check_in>=dfrom)&&(!dto||r.check_in<=dto);}
     return yearFilter==='todos'||new Date(r.check_in).getFullYear()===yN;
   };
-  const res=allReservas.filter(r=>inPeriod(r)&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter));
+  const res=allReservas.filter(r=>inPeriod(r)&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter)&&(globalPlatFilter==='todas'||r.platform===globalPlatFilter));
   // Período comparativo
   const cfrom=document.getElementById('comp-from')?.value||'';
   const cto=document.getElementById('comp-to')?.value||'';
