@@ -528,6 +528,8 @@ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let allReservas=[],allGastos=[],allApartments=[],allLarga=[];
 let selectedApts=new Set(),selectedCanales=new Set(),selectedCats=new Set();
 let estFilter='todas',yearFilter='todos',charts={};
+// Compatibility aliases — kept for internal render functions
+let aptFilter='todos',resAptFilter='todos',platFilter='todas',globalPlatFilter='todas',gastosCatFilter='todas';
 const MESES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const MESES_FULL=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const PLAT_COLOR={Booking:'#78350F',Airbnb:'#BE123C',Particular:'#047857',Otro:'#57534E'};
@@ -795,7 +797,7 @@ function renderDashboard(){
   const ok=res.filter(r=>r.status==='confirmed');
   const okTur=ok.filter(r=>['Booking','Airbnb','Particular','Otro'].includes(r.platform));
   // Larga temporada
-  const ltFilt=allLarga.filter(l=>aptFilter==='todos'||l.apartments?.short_code===aptFilter);
+  const ltFilt=allLarga.filter(l=>selectedApts.size===0||selectedApts.has(l.apartments?.short_code));
   const ltIngresos=ltFilt.reduce((s,l)=>{
     const pays=(l.long_term_payments||[]).filter(p=>p.paid&&(yearFilter==='todos'||p.year===yN));
     return s+pays.reduce((ss,p)=>ss+(+p.amount||0),0);
@@ -1004,7 +1006,7 @@ function renderGastos(){
   });
   const total=gas.reduce((s,g)=>s+(+g.amount||0),0);
   const yo=gas.filter(g=>g.paid_by==='Propietario').reduce((s,g)=>s+(+g.amount||0),0);
-  const bruto=allReservas.filter(r=>(aptFilter==='todos'||r.apartments?.short_code===aptFilter)&&(yearFilter==='todos'||new Date(r.check_in).getFullYear()===parseInt(yearFilter))&&r.status==='confirmed').reduce((s,r)=>s+(+r.gross_amount||0),0);
+  const bruto=allReservas.filter(r=>(selectedApts.size===0||selectedApts.has(r.apartments?.short_code))&&r.status==='confirmed').reduce((s,r)=>s+(+r.gross_amount||0),0);
   document.getElementById('gastos-kpi-row').innerHTML=[
     {label:'Total gastos',value:fmt(total),sub:'Todos los conceptos',color:'var(--text)'},
     {label:'Pago yo',value:fmt(yo),sub:'Sale de mi bolsillo',color:'#DC2626'},
