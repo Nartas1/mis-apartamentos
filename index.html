@@ -24,31 +24,59 @@ input:focus,select:focus,textarea:focus{border-color:var(--purple)}
 .btn-sm{padding:5px 10px;font-size:11px}
 .error-msg{font-size:12px;color:var(--red);text-align:center}
 #app-view{display:none;flex-direction:row;min-height:100vh}
-.sidebar{width:210px;background:#EDEAE4;border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0}
+.sidebar{width:220px;background:#EDEAE4;border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0}
 .sidebar-brand{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
-nav{flex:1;padding:10px 8px}
+.sidebar-section{padding:12px 12px 4px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+nav{padding:6px 8px}
 .nav-btn{width:100%;padding:9px 10px;background:transparent;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted);text-align:left;margin-bottom:2px;transition:all .15s}
-.nav-btn:hover{background:#f0ede8}
+.nav-btn:hover{background:#E8E4DE}
 .nav-btn.active{background:#FEF3C7;color:#B45309;font-weight:600}
-.sidebar-footer{padding:14px 12px;border-top:1px solid var(--border)}
+.nav-icon{width:18px;text-align:center}
+.sidebar-footer{padding:14px 12px;border-top:1px solid var(--border);margin-top:auto}
 .apt-badges{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
 .apt-badge{flex:1;min-width:40px;border-radius:6px;padding:4px;text-align:center;font-size:9px;font-weight:700}
 .btn-logout{width:100%;padding:7px;background:transparent;border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted);cursor:pointer}
 .main{flex:1;display:flex;flex-direction:column;min-width:0;overflow-x:hidden}
-.topbar{background:#E2DED8;border-bottom:1px solid var(--border);padding:13px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;flex-wrap:wrap}
+.topbar{background:#E2DED8;border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:10;flex-wrap:wrap}
 .topbar h2{font-size:14px;font-weight:700;flex:1}
-.filter-btns{display:flex;gap:6px;flex-wrap:wrap}
-.filter-btn{padding:6px 13px;border-radius:7px;border:1px solid var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;transition:all .15s}
-.f-all,.f-active{border-color:#B45309;background:#FEF3C7;color:#B45309;font-weight:700}
-.f-bel{border-color:#047857;background:#D1FAE5;color:#047857;font-weight:700}
+.period-pill{display:flex;align-items:center;gap:5px;background:#FFFFFF;border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600}
+.period-pill input{border:none;background:transparent;font-size:11px;font-weight:600;color:var(--text);padding:0;width:105px;outline:none}
+.period-pill .sep{color:var(--muted);font-size:10px}
+.compare-pill{display:flex;align-items:center;gap:5px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600}
+.compare-pill input{border:none;background:transparent;font-size:11px;font-weight:600;color:#92400E;padding:0;width:105px;outline:none}
+.quick-select{padding:5px 8px;border:1px solid var(--border);border-radius:7px;font-size:11px;background:var(--card);cursor:pointer;outline:none;color:var(--muted)}
+.filter-chip{display:inline-flex;align-items:center;padding:5px 10px;border:1px solid var(--border);border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;background:var(--card);color:var(--muted);transition:all .15s}
+.filter-chip:hover{border-color:#B45309;color:#B45309}
+.filter-chip.on{background:#FEF3C7;border-color:#B45309;color:#B45309}
+/* MULTI-SELECT DROPDOWN */
+.dd-wrap{position:relative;display:inline-block}
+.dd-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--border);border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;background:var(--card);color:var(--text);white-space:nowrap;user-select:none;transition:border .15s}
+.dd-btn:hover{border-color:#B45309}
+.dd-btn.active{border-color:#B45309;background:#FEF3C7;color:#B45309}
+.dd-btn .dd-arrow{font-size:8px;color:var(--muted);transition:transform .15s}
+.dd-btn.open .dd-arrow{transform:rotate(180deg)}
+.dd-count{background:#B45309;color:#fff;border-radius:10px;font-size:10px;padding:1px 5px;font-weight:700}
+.dd-menu{position:absolute;top:calc(100% + 4px);left:0;min-width:160px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 6px 24px #00000020;z-index:200;padding:6px;display:none}
+.dd-menu.open{display:block}
+.dd-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;font-size:12px;cursor:pointer;transition:background .1s;color:var(--text)}
+.dd-item:hover{background:#F5F2ED}
+.dd-item input[type=checkbox]{width:14px;height:14px;accent-color:#B45309;flex-shrink:0;cursor:pointer}
+.dd-item.checked{color:#B45309;font-weight:600}
+.dd-sep{height:1px;background:var(--border);margin:4px 0}
 .page{display:none;padding:20px 24px;flex-direction:column;gap:18px}
 .page.active{display:flex}
 .kpi-row{display:flex;gap:10px;flex-wrap:wrap}
-.kpi-card{background:#FFFFFF;border:1px solid var(--border);border-radius:12px;padding:14px 16px;flex:1;min-width:150px;box-shadow:0 2px 12px #00000018}
+.kpi-card{background:#FFFFFF;border:1px solid var(--border);border-radius:12px;padding:14px 16px;flex:1;min-width:150px;box-shadow:0 2px 12px #00000018;position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kpi-color,#B45309)}
 .kpi-icon{font-size:20px;margin-bottom:6px}
 .kpi-label{font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.3;text-transform:uppercase;letter-spacing:.4px}
 .kpi-value{font-size:20px;font-weight:800;letter-spacing:-0.5px}
-.kpi-sub{font-size:10px;color:var(--muted);margin-top:4px}
+.kpi-footer{display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap}
+.kpi-sub{font-size:10px;color:var(--muted)}
+.kpi-badge{font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px}
+.kpi-badge.up{background:#D1FAE5;color:#065F46}
+.kpi-badge.down{background:#FEE2E2;color:#991B1B}
+.kpi-badge.neutral{background:#F5F5F0;color:var(--muted)}
 .card{background:#FFFFFF;border:1px solid var(--border);border-radius:12px;padding:18px 20px;box-shadow:0 2px 12px #00000008}
 .card-title{font-size:14px;font-weight:700;margin-bottom:4px}
 .card-sub{font-size:11px;color:var(--muted);margin-bottom:14px}
@@ -71,13 +99,14 @@ tr:last-child td{border-bottom:none}
 .filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .search-box{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;outline:none;width:180px}
 .date-box{padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;outline:none}
-.fp{padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:transparent;font-size:11px;color:var(--muted);cursor:pointer}
-.fp.on{border-color:#B45309;background:#FEF3C7;color:#B45309;font-weight:600}
+.fp{padding:6px 12px;border:1px solid var(--border);border-radius:20px;background:var(--card);font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s}
+.fp:hover{border-color:#B45309;color:#B45309}
+.fp.on{background:#FEF3C7;border-color:#B45309;color:#B45309}
 .stats-row{margin-left:auto;display:flex;gap:12px;font-size:11px;color:var(--muted);flex-wrap:wrap}
 .loading{text-align:center;padding:40px;color:var(--muted);font-size:13px}
 .modal-bg{display:none;position:fixed;inset:0;background:#00000045;z-index:100;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
 .modal-bg.open{display:flex}
-.modal{background:#FFFFFF;border-radius:16px;padding:28px;width:100%;max-width:520px;display:flex;flex-direction:column;gap:16px;margin:auto}
+.modal{background:#FFFFFF;border-radius:16px;padding:28px;width:100%;max-width:520px;margin:auto;display:flex;flex-direction:column;gap:16px}
 .modal-title{font-size:16px;font-weight:700}
 .form-row{display:flex;gap:12px}
 .form-row>div{flex:1}
@@ -88,7 +117,7 @@ tr:last-child td{border-bottom:none}
 .csv-drop .icon{font-size:28px;margin-bottom:8px}
 .csv-drop p{font-size:13px;color:var(--muted)}
 .csv-drop strong{color:#B45309}
-.csv-preview{margin-top:12px;font-size:11px;color:var(--muted);background:#f9fafb;border-radius:8px;padding:10px 14px;max-height:120px;overflow-y:auto}
+.csv-preview{margin-top:10px;font-size:11px;color:var(--muted);background:#f9fafb;border-radius:8px;padding:10px 14px;max-height:120px;overflow-y:auto}
 .ocup-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:5px;margin-top:10px}
 .ocup-cell{text-align:center}
 .ocup-bar{height:60px;border-radius:8px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;position:relative;overflow:hidden}
@@ -100,7 +129,7 @@ tr:last-child td{border-bottom:none}
 .legend-dot{width:9px;height:9px;border-radius:2px}
 .lt-card{border:1px solid var(--border);border-radius:12px;padding:18px;background:#FFFFFF;box-shadow:0 2px 12px #00000018;display:flex;flex-direction:column;gap:12px;margin-bottom:12px}
 .lt-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.lt-pay{flex:1;min-width:130px;background:#F5F2ED;border-radius:8px;padding:10px 12px}
+.lt-pay{flex:1;min-width:130px;background:#F5F2ED;border-radius:8px;padding:10px 12px;position:relative}
 .add-btn{padding:14px;background:transparent;border:2px dashed var(--border);border-radius:12px;font-size:13px;color:var(--muted);cursor:pointer;text-align:center;width:100%;transition:all .2s}
 .add-btn:hover{border-color:#B45309;color:#B45309}
 .action-bar{display:flex;gap:8px;flex-wrap:wrap}
@@ -124,53 +153,92 @@ tr:last-child td{border-bottom:none}
 <div id="app-view">
   <div class="sidebar">
     <div class="sidebar-brand">
-      <span style="font-size:22px">🏠</span>
-      <div><div style="font-size:13px;font-weight:700">Mis Apartamentos</div><div style="font-size:10px;color:var(--muted)">Gestión privada</div></div>
+      <div class="sidebar-brand-icon">🏠</div>
+      <div>
+        <div class="sidebar-brand-text">Mis Apartamentos</div>
+        <div class="sidebar-brand-sub">Gestión privada</div>
+      </div>
     </div>
+    <div class="sidebar-section">Análisis</div>
     <nav>
-      <button class="nav-btn active" onclick="showPage('dashboard')" id="nav-dashboard"><span>📊</span>Resumen</button>
-      <button class="nav-btn" onclick="showPage('reservas')" id="nav-reservas"><span>📋</span>Reservas</button>
-      <button class="nav-btn" onclick="showPage('gastos')" id="nav-gastos"><span>💰</span>Gastos</button>
-      <button class="nav-btn" onclick="showPage('larga')" id="nav-larga"><span>🌙</span>Larga Temporada</button>
+      <button class="nav-btn active" onclick="showPage('dashboard')" id="nav-dashboard"><span class="nav-icon">📊</span>Resumen</button>
+    </nav>
+    <div class="sidebar-section">Gestión</div>
+    <nav>
+      <button class="nav-btn" onclick="showPage('reservas')" id="nav-reservas"><span class="nav-icon">📋</span>Reservas</button>
+      <button class="nav-btn" onclick="showPage('gastos')" id="nav-gastos"><span class="nav-icon">💰</span>Gastos</button>
+      <button class="nav-btn" onclick="showPage('larga')" id="nav-larga"><span class="nav-icon">🌙</span>Larga Temporada</button>
     </nav>
     <div class="sidebar-footer">
       <div class="apt-badges" id="apt-badges-sidebar"></div>
-      <button class="btn-logout" onclick="doLogout()">Cerrar sesión</button>
+      <button class="btn-logout" onclick="doLogout()">← Cerrar sesión</button>
     </div>
   </div>
 
   <div class="main">
     <div class="topbar">
-      <h2 id="page-title">📊 Resumen</h2>
+      <h2 id="page-title">Resumen</h2>
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <span style="font-size:11px;color:var(--muted)">Período:</span>
-        <input type="date" id="date-from" onchange="applyDateFilter()" style="padding:5px 8px;border:1px solid var(--border);border-radius:7px;font-size:11px;outline:none;background:var(--card)">
-        <span style="font-size:11px;color:var(--muted)">→</span>
-        <input type="date" id="date-to" onchange="applyDateFilter()" style="padding:5px 8px;border:1px solid var(--border);border-radius:7px;font-size:11px;outline:none;background:var(--card)">
-        <button onclick="clearDateFilter()" style="padding:5px 8px;border:1px solid var(--border);border-radius:7px;font-size:10px;background:transparent;cursor:pointer;color:var(--muted)">✕ Limpiar</button>
-        <select id="quick-period" onchange="applyQuickPeriod(this.value)" style="padding:5px 8px;border:1px solid var(--border);border-radius:7px;font-size:11px;outline:none;background:var(--card);cursor:pointer">
-          <option value="">Período rápido...</option>
-          <option value="this-year">Este año</option>
-          <option value="last-year">Año anterior</option>
-          <option value="this-month">Este mes</option>
-          <option value="last-month">Mes anterior</option>
-          <option value="last-3">Últimos 3 meses</option>
-          <option value="last-6">Últimos 6 meses</option>
-        </select>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <span style="font-size:11px;color:var(--muted)">Comparar con:</span>
-        <input type="date" id="comp-from" onchange="renderDashboard()" style="padding:5px 8px;border:1px solid #B45309;border-radius:7px;font-size:11px;outline:none;background:#FEF3C7">
-        <span style="font-size:11px;color:var(--muted)">→</span>
-        <input type="date" id="comp-to" onchange="renderDashboard()" style="padding:5px 8px;border:1px solid #B45309;border-radius:7px;font-size:11px;outline:none;background:#FEF3C7">
-        <button onclick="clearCompare()" style="padding:5px 8px;border:1px solid #B45309;border-radius:7px;font-size:10px;background:transparent;cursor:pointer;color:#B45309">✕</button>
-      </div>
-      <div class="filter-btns" id="apt-filter-btns"></div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap" id="global-plat-btns">
-        <button class="fp on" onclick="setGlobalPlatFilter('todas',this)">Todos canales</button>
-        <button class="fp" onclick="setGlobalPlatFilter('Booking',this)" style="color:#78350F;border-color:#FCD34D">Booking</button>
-        <button class="fp" onclick="setGlobalPlatFilter('Airbnb',this)" style="color:#BE123C;border-color:#FECDD3">Airbnb</button>
-        <button class="fp" onclick="setGlobalPlatFilter('Particular',this)" style="color:#065F46;border-color:#6EE7B7">Directo</button>
+        <!-- Período -->
+        <div class="dd-wrap">
+          <div class="dd-btn" id="btn-periodo" onclick="togglePeriodPanel()">
+            <span id="periodo-label">Período</span>
+            <span class="dd-arrow">▼</span>
+          </div>
+          <div class="dd-menu" id="menu-periodo" style="min-width:280px;padding:10px 12px">
+            <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px">
+              <input type="date" id="date-from" onchange="applyDateFilter()" style="flex:1;font-size:11px;padding:5px 7px">
+              <span style="color:var(--muted);font-size:11px">→</span>
+              <input type="date" id="date-to" onchange="applyDateFilter()" style="flex:1;font-size:11px;padding:5px 7px">
+              <button onclick="clearDateFilter()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px">✕</button>
+            </div>
+            <div class="dd-sep"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:6px">
+              <div class="dd-item" style="justify-content:center;background:var(--bg)" onclick="applyQuickPeriod('this-year')">Este año</div>
+              <div class="dd-item" style="justify-content:center;background:var(--bg)" onclick="applyQuickPeriod('last-year')">Año anterior</div>
+              <div class="dd-item" style="justify-content:center;background:var(--bg)" onclick="applyQuickPeriod('this-month')">Este mes</div>
+              <div class="dd-item" style="justify-content:center;background:var(--bg)" onclick="applyQuickPeriod('last-month')">Mes anterior</div>
+              <div class="dd-item" style="justify-content:center;background:var(--bg)" onclick="applyQuickPeriod('last-3')">Últimos 3m</div>
+              <div class="dd-item" style="justify-content:center;background:var(--bg)" onclick="applyQuickPeriod('last-6')">Últimos 6m</div>
+            </div>
+          </div>
+        </div>
+        <!-- Vs período -->
+        <div class="dd-wrap">
+          <div class="dd-btn" id="btn-compare" onclick="toggleComparePanel()">
+            <span id="compare-label">Comparar con</span>
+            <span class="dd-arrow">▼</span>
+          </div>
+          <div class="dd-menu" id="menu-compare" style="min-width:260px;padding:10px 12px">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase">Período comparativo</div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input type="date" id="comp-from" onchange="updateCompareLabel()" style="flex:1;font-size:11px;padding:5px 7px">
+              <span style="color:var(--muted);font-size:11px">→</span>
+              <input type="date" id="comp-to" onchange="updateCompareLabel()" style="flex:1;font-size:11px;padding:5px 7px">
+              <button onclick="clearCompare()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px">✕</button>
+            </div>
+          </div>
+        </div>
+        <!-- Apartamentos multi-select -->
+        <div class="dd-wrap" id="dd-apt-wrap">
+          <div class="dd-btn" id="btn-apt" onclick="toggleDd('dd-apt')">
+            <span id="apt-label">Apartamento</span>
+            <span class="dd-arrow">▼</span>
+          </div>
+          <div class="dd-menu" id="dd-apt"></div>
+        </div>
+        <!-- Canal multi-select -->
+        <div class="dd-wrap" id="dd-canal-wrap">
+          <div class="dd-btn" id="btn-canal" onclick="toggleDd('dd-canal')">
+            <span id="canal-label">Canal</span>
+            <span class="dd-arrow">▼</span>
+          </div>
+          <div class="dd-menu" id="dd-canal">
+            <div class="dd-item" onclick="toggleCanalItem(this,'Booking')"><input type="checkbox" onclick="event.stopPropagation()"> Booking</div>
+            <div class="dd-item" onclick="toggleCanalItem(this,'Airbnb')"><input type="checkbox" onclick="event.stopPropagation()"> Airbnb</div>
+            <div class="dd-item" onclick="toggleCanalItem(this,'Particular')"><input type="checkbox" onclick="event.stopPropagation()"> Directo</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -178,17 +246,14 @@ tr:last-child td{border-bottom:none}
     <div class="page active" id="page-dashboard">
       <div class="kpi-row" id="kpi-row"><div class="loading">Cargando datos...</div></div>
       <div class="flex-row">
-        <div class="card" style="flex:2"><div class="card-title">Ingresos por mes</div><div class="card-sub">Reservas turísticas confirmadas</div><canvas id="chart-monthly" height="110"></canvas></div>
+        <div class="card" style="flex:2"><div class="card-title">Ingresos netos por mes</div><div class="card-sub">Neto tras comisiones y cargos de plataforma</div><canvas id="chart-monthly" height="110"></canvas></div>
         <div class="card" style="width:220px"><div class="card-title">Mix canales</div><div class="card-sub">% sobre ingresos brutos</div><canvas id="chart-channels" height="160"></canvas><div id="channel-legend" style="margin-top:10px;display:flex;flex-direction:column;gap:4px"></div></div>
       </div>
-      <div class="card"><div class="card-title">Ocupación por apartamento</div><div class="card-sub">% noches ocupadas · reservas turísticas</div>
-        <div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#059669"></div>Alta ≥75%</div><div class="legend-item"><div class="legend-dot" style="background:#D97706"></div>Media 50-75%</div><div class="legend-item"><div class="legend-dot" style="background:#DC2626"></div>Baja &lt;50%</div></div>
-        <div id="ocup-dashboard"></div>
-      </div>
-      <div class="card"><div class="card-title">Cuenta de resultados</div><div id="results-row" style="display:flex;margin-top:12px;border-radius:8px;overflow:hidden;border:1px solid var(--border)"></div></div>
+
+
       <div id="chart-comparison-wrap" style="display:none">
         <div id="kpi-comparison" style="margin-bottom:14px"></div>
-        <div class="card"><div class="card-title">📈 Comparativa anual</div><div class="card-sub">Ingresos mensuales por año</div><canvas id="chart-comparison" height="100"></canvas></div>
+        <div class="card"><div class="card-title">Comparativa anual</div><div class="card-sub">Ingresos netos mensuales (tras comisiones) por año</div><canvas id="chart-comparison" height="100"></canvas></div>
       </div>
     </div>
 
@@ -222,18 +287,11 @@ tr:last-child td{border-bottom:none}
           <div id="csv-result2" style="margin-top:10px;display:none"></div>
         </div>
       </div>
-      <div id="res-apt-filter-btns" style="display:flex;gap:5px;flex-wrap:wrap"></div>
       <div class="filters">
-        <input type="text" class="search-box" id="search-guest" placeholder="🔍 Buscar huésped..." oninput="renderReservas()">
-        <input type="date" id="filter-from" class="date-box" onchange="renderReservas()">
-        <input type="date" id="filter-to" class="date-box" onchange="renderReservas()">
-        <button class="fp on" onclick="setPlatFilter('todas',this)">Todos</button>
-        <button class="fp" onclick="setPlatFilter('Booking',this)">Booking</button>
-        <button class="fp" onclick="setPlatFilter('Airbnb',this)">Airbnb</button>
-        <button class="fp" onclick="setPlatFilter('Particular',this)">Directo</button>
+        <input type="text" class="search-box" id="search-guest" placeholder="Buscar huésped..." oninput="renderReservas()">
         <button class="fp on" onclick="setEstFilter('todas',this)">Todos</button>
-        <button class="fp" onclick="setEstFilter('confirmed',this)">✓ Confirmadas</button>
-        <button class="fp" onclick="setEstFilter('cancelled',this)">✗ Canceladas</button>
+        <button class="fp" onclick="setEstFilter('confirmed',this)">Confirmadas</button>
+        <button class="fp" onclick="setEstFilter('cancelled',this)">Canceladas</button>
         <div class="stats-row" id="res-stats"></div>
       </div>
       <div class="table-wrap">
@@ -247,19 +305,25 @@ tr:last-child td{border-bottom:none}
     <!-- GASTOS -->
     <div class="page" id="page-gastos">
       <div class="action-bar"><button class="btn btn-primary" onclick="openModalGasto()">+ Añadir gasto</button></div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center" id="gastos-cat-btns">
-        <span style="font-size:11px;color:var(--muted)">Categoría:</span>
-        <button class="fp on" onclick="setGastosCatFilter('todas',this)">Todas</button>
-        <button class="fp" onclick="setGastosCatFilter('Electricidad',this)">⚡ Electricidad</button>
-        <button class="fp" onclick="setGastosCatFilter('Agua',this)">💧 Agua</button>
-        <button class="fp" onclick="setGastosCatFilter('Internet',this)">🌐 Internet</button>
-        <button class="fp" onclick="setGastosCatFilter('Comunidad',this)">🏢 Comunidad</button>
-        <button class="fp" onclick="setGastosCatFilter('Seguro',this)">🛡️ Seguro</button>
-        <button class="fp" onclick="setGastosCatFilter('IBI',this)">🏛️ IBI</button>
-        <button class="fp" onclick="setGastosCatFilter('Basura',this)">🗑️ Basura</button>
-        <button class="fp" onclick="setGastosCatFilter('Mantenimiento',this)">🔧 Mantenimiento</button>
-        <button class="fp" onclick="setGastosCatFilter('Reparacion',this)">🔨 Reparación</button>
-        <button class="fp" onclick="setGastosCatFilter('Otros',this)">📦 Otros</button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div class="dd-wrap">
+          <div class="dd-btn" id="btn-cat" onclick="toggleDd('dd-cat')">
+            <span id="cat-label">Categoría</span>
+            <span class="dd-arrow">▼</span>
+          </div>
+          <div class="dd-menu" id="dd-cat">
+            <div class="dd-item" onclick="toggleCatItem(this,'Electricidad')"><input type="checkbox" onclick="event.stopPropagation()"> Electricidad</div>
+            <div class="dd-item" onclick="toggleCatItem(this,'Agua')"><input type="checkbox" onclick="event.stopPropagation()"> Agua</div>
+            <div class="dd-item" onclick="toggleCatItem(this,'Internet')"><input type="checkbox" onclick="event.stopPropagation()"> Internet</div>
+            <div class="dd-item" onclick="toggleCatItem(this,'Comunidad')"><input type="checkbox" onclick="event.stopPropagation()"> Comunidad</div>
+            <div class="dd-item" onclick="toggleCatItem(this,'Seguro')"><input type="checkbox" onclick="event.stopPropagation()"> Seguro</div>
+            <div class="dd-item" onclick="toggleCatItem(this,'IBI')"><input type="checkbox" onclick="event.stopPropagation()"> IBI</div>
+            <div class="dd-item" onclick="toggleCatItem(this,'Basura')"><input type="checkbox" onclick="event.stopPropagation()"> Basura</div>
+            <div class="dd-item" onclick="toggleCatItem(this,'Mantenimiento')"><input type="checkbox" onclick="event.stopPropagation()"> Mantenimiento</div>
+            <div class="dd-item" onclick="toggleCatItem(this,'Reparacion')"><input type="checkbox" onclick="event.stopPropagation()"> Reparación</div>
+            <div class="dd-item" onclick="toggleCatItem(this,'Otros')"><input type="checkbox" onclick="event.stopPropagation()"> Otros</div>
+          </div>
+        </div>
       </div>
       <div class="kpi-row" id="gastos-kpi-row"></div>
       <div class="flex-row">
@@ -462,7 +526,8 @@ const SUPABASE_KEY='sb_publishable_ZaF-vnJg6j-Iozi8WoF39w_dHH-wgAi';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let allReservas=[],allGastos=[],allApartments=[],allLarga=[];
-let aptFilter='todos',resAptFilter='todos',platFilter='todas',estFilter='todas',yearFilter='todos',globalPlatFilter='todas',gastosCatFilter='todas',charts={};
+let selectedApts=new Set(),selectedCanales=new Set(),selectedCats=new Set();
+let estFilter='todas',yearFilter='todos',charts={};
 const MESES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const MESES_FULL=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const PLAT_COLOR={Booking:'#78350F',Airbnb:'#BE123C',Particular:'#047857',Otro:'#57534E'};
@@ -508,14 +573,8 @@ function buildSidebar(){
   document.getElementById('apt-badges-sidebar').innerHTML=allApartments.map((a,i)=>
     `<div class="apt-badge" style="background:${(a.color||APT_COLORS[i])+'18'};border:1px solid ${(a.color||APT_COLORS[i])+'50'};color:${a.color||APT_COLORS[i]}">${a.short_code}</div>`
   ).join('');
-  document.getElementById('apt-filter-btns').innerHTML=
-    `<button class="filter-btn f-all" onclick="setAptFilter('todos',this)">Todos</button>`+
-    allApartments.map(a=>`<button class="filter-btn" onclick="setAptFilter('${a.short_code}',this)">${a.name.split(' ')[0]}</button>`).join('');
-  // Apt filter in reservas
-  const resAptDiv=document.getElementById('res-apt-filter-btns');
-  if(resAptDiv) resAptDiv.innerHTML=
-    `<button class="fp on" onclick="setResAptFilter('todos',this)">Todos apts.</button>`+
-    allApartments.map(a=>`<button class="fp" onclick="setResAptFilter('${a.short_code}',this)" style="border-color:${a.color||'#888'}">${a.short_code}</button>`).join('');
+  // Build apt dropdown
+  buildAptDropdown();
   // Modal selects
   const opts=allApartments.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
   ['res-apt','gasto-apt','lt-apt'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
@@ -533,24 +592,111 @@ function buildYearFilter(){
 }
 function setYearFilter(y){yearFilter=y;renderCurrentPage();}
 
+// ── DROPDOWN HELPERS ──────────────────────────────────────────────
+let openDd=null;
+document.addEventListener('click',e=>{if(!e.target.closest('.dd-wrap')&&openDd){document.getElementById(openDd)?.classList.remove('open');document.getElementById('btn-'+openDd.replace('dd-','').replace('apt','apt').replace('canal','canal'))?.classList.remove('open');openDd=null;}});
+
+function toggleDd(id){
+  const menu=document.getElementById(id);
+  const btn=document.getElementById('btn-'+id.replace('dd-',''));
+  if(openDd&&openDd!==id){document.getElementById(openDd)?.classList.remove('open');document.getElementById('btn-'+openDd.replace('dd-',''))?.classList.remove('open');}
+  const isOpen=menu.classList.toggle('open');
+  btn?.classList.toggle('open',isOpen);
+  openDd=isOpen?id:null;
+}
+function togglePeriodPanel(){
+  const menu=document.getElementById('menu-periodo');
+  const btn=document.getElementById('btn-periodo');
+  if(openDd&&openDd!=='periodo'){document.getElementById(openDd)?.classList.remove('open');}
+  const isOpen=menu.classList.toggle('open');
+  btn?.classList.toggle('open',isOpen);
+  openDd=isOpen?'periodo':null;
+}
+function toggleComparePanel(){
+  const menu=document.getElementById('menu-compare');
+  const btn=document.getElementById('btn-compare');
+  if(openDd&&openDd!=='compare'){document.getElementById(openDd)?.classList.remove('open');}
+  const isOpen=menu.classList.toggle('open');
+  btn?.classList.toggle('open',isOpen);
+  openDd=isOpen?'compare':null;
+}
+
+// ── APT MULTI-SELECT ──────────────────────────────────────────────
+function buildAptDropdown(){
+  const menu=document.getElementById('dd-apt');
+  if(!menu)return;
+  menu.innerHTML=allApartments.map(a=>`<div class="dd-item" onclick="toggleAptItem(this,'${a.short_code}')"><input type="checkbox" onclick="event.stopPropagation()"> ${a.name.split(' ')[0]} (${a.short_code})</div>`).join('');
+}
+function toggleAptItem(el,code){
+  const cb=el.querySelector('input');
+  cb.checked=!cb.checked;
+  if(cb.checked)selectedApts.add(code);else selectedApts.delete(code);
+  el.classList.toggle('checked',cb.checked);
+  updateAptLabel();
+  renderCurrentPage();
+}
+function updateAptLabel(){
+  const lbl=document.getElementById('apt-label');
+  const btn=document.getElementById('btn-apt');
+  if(!lbl)return;
+  if(selectedApts.size===0){lbl.textContent='Apartamento';btn.classList.remove('active');}
+  else{lbl.innerHTML=`Apartamento <span class="dd-count">${selectedApts.size}</span>`;btn.classList.add('active');}
+}
+
+// ── CANAL MULTI-SELECT ────────────────────────────────────────────
+function toggleCanalItem(el,canal){
+  const cb=el.querySelector('input');
+  cb.checked=!cb.checked;
+  if(cb.checked)selectedCanales.add(canal);else selectedCanales.delete(canal);
+  el.classList.toggle('checked',cb.checked);
+  updateCanalLabel();
+  renderCurrentPage();
+}
+function updateCanalLabel(){
+  const lbl=document.getElementById('canal-label');
+  const btn=document.getElementById('btn-canal');
+  if(!lbl)return;
+  if(selectedCanales.size===0){lbl.textContent='Canal';btn.classList.remove('active');}
+  else{lbl.innerHTML=`Canal <span class="dd-count">${selectedCanales.size}</span>`;btn.classList.add('active');}
+}
+
+// ── PERIODO LABEL UPDATE ──────────────────────────────────────────
+function updatePeriodLabel(){
+  const from=document.getElementById('date-from')?.value;
+  const to=document.getElementById('date-to')?.value;
+  const lbl=document.getElementById('periodo-label');
+  const btn=document.getElementById('btn-periodo');
+  if(!lbl)return;
+  if(from&&to){lbl.textContent=from.slice(5)+' → '+to.slice(5);btn.classList.add('active');}
+  else if(from){lbl.textContent='Desde '+from.slice(5);btn.classList.add('active');}
+  else{lbl.textContent='Período';btn.classList.remove('active');}
+}
+function updateCompareLabel(){
+  const from=document.getElementById('comp-from')?.value;
+  const to=document.getElementById('comp-to')?.value;
+  const lbl=document.getElementById('compare-label');
+  const btn=document.getElementById('btn-compare');
+  if(!lbl)return;
+  if(from&&to){lbl.textContent=from.slice(0,4)+' vs '+to.slice(0,4);btn.classList.add('active');}
+  else{lbl.textContent='Comparar con';btn.classList.remove('active');}
+  renderDashboard();
+}
+function setYearFilter(y){yearFilter=y;renderCurrentPage();}
+
 function applyDateFilter(){
-  const from=document.getElementById('date-from').value;
-  const to=document.getElementById('date-to').value;
-  if(from||to){yearFilter='custom';}
-  document.getElementById('quick-period').value='';
+  updatePeriodLabel();
   renderCurrentPage();
 }
 function clearDateFilter(){
   document.getElementById('date-from').value='';
   document.getElementById('date-to').value='';
-  document.getElementById('quick-period').value='';
-  yearFilter='todos';
+  updatePeriodLabel();
   renderCurrentPage();
 }
 function clearCompare(){
   document.getElementById('comp-from').value='';
   document.getElementById('comp-to').value='';
-  renderDashboard();
+  updateCompareLabel();
 }
 function applyQuickPeriod(val){
   if(!val)return;
@@ -565,28 +711,31 @@ function applyQuickPeriod(val){
   else if(val==='last-6'){const d=new Date(y,m-6,1);from=d.toISOString().split('T')[0];to=new Date(y,m+1,0).toISOString().split('T')[0];}
   document.getElementById('date-from').value=from;
   document.getElementById('date-to').value=to;
-  yearFilter='custom';
+  updatePeriodLabel();
+  document.getElementById('menu-periodo')?.classList.remove('open');
+  document.getElementById('btn-periodo')?.classList.remove('open');
+  openDd=null;
   renderCurrentPage();
 }
-function setGastosCatFilter(cat,btn){
-  gastosCatFilter=cat;
-  document.querySelectorAll('#gastos-cat-btns .fp').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
+function toggleCatItem(el,cat){
+  const cb=el.querySelector('input');
+  cb.checked=!cb.checked;
+  if(cb.checked)selectedCats.add(cat);else selectedCats.delete(cat);
+  el.classList.toggle('checked',cb.checked);
+  const lbl=document.getElementById('cat-label');
+  const btn=document.getElementById('btn-cat');
+  if(lbl){if(selectedCats.size===0){lbl.textContent='Categoría';btn.classList.remove('active');}else{lbl.innerHTML=`Categoría <span class="dd-count">${selectedCats.size}</span>`;btn.classList.add('active');}}
   renderGastos();
 }
-function setGlobalPlatFilter(p,btn){
-  globalPlatFilter=p;
-  document.querySelectorAll('#global-plat-btns .fp').forEach(b=>b.classList.remove('on'));
+function setGastosCatFilter(cat,btn){renderGastos();}
+
+function setAptFilter(apt,btn){
+  aptFilter=apt;
+  document.querySelectorAll('#apt-filter-btns .fp').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   renderCurrentPage();
 }
-function setAptFilter(apt,btn){
-  aptFilter=apt;
-  document.querySelectorAll('#apt-filter-btns .filter-btn').forEach(b=>b.className='filter-btn');
-  btn.className='filter-btn f-'+(apt==='todos'?'all':'active');
-  renderCurrentPage();
-}
-function setResAptFilter(a,btn){resAptFilter=a;document.querySelectorAll('#res-apt-filter-btns .fp').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderReservas();}
+
 function setPlatFilter(p,btn){platFilter=p;document.querySelectorAll('.fp').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderReservas();}
 function setEstFilter(e,btn){estFilter=e;document.querySelectorAll('.fp').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderReservas();}
 
@@ -616,12 +765,10 @@ function filteredRes(){
   const dfrom=document.getElementById('date-from')?.value||'';
   const dto=document.getElementById('date-to')?.value||'';
   return allReservas.filter(r=>{
-    if(yearFilter!=='todos'&&yearFilter!=='custom'&&new Date(r.check_in).getFullYear()!==parseInt(yearFilter))return false;
-    if(yearFilter==='custom'){if(dfrom&&r.check_in<dfrom)return false;if(dto&&r.check_in>dto)return false;}
-    if(aptFilter!=='todos'&&r.apartments?.short_code!==aptFilter)return false;
-    if(resAptFilter!=='todos'&&r.apartments?.short_code!==resAptFilter)return false;
-    if(platFilter!=='todas'&&r.platform!==platFilter)return false;
-    if(globalPlatFilter!=='todas'&&r.platform!==globalPlatFilter)return false;
+    if(dfrom&&r.check_in<dfrom)return false;
+    if(dto&&r.check_in>dto)return false;
+    if(selectedApts.size>0&&!selectedApts.has(r.apartments?.short_code))return false;
+    if(selectedCanales.size>0&&!selectedCanales.has(r.platform))return false;
     if(estFilter!=='todas'&&r.status!==estFilter)return false;
     const q=document.getElementById('search-guest')?.value.toLowerCase()||'';
     if(q&&!r.guest_name.toLowerCase().includes(q))return false;
@@ -633,12 +780,9 @@ function filteredRes(){
 function renderDashboard(){
   const dfrom=document.getElementById('date-from')?.value||'';
   const dto=document.getElementById('date-to')?.value||'';
-  const yN=yearFilter==='todos'?new Date().getFullYear():yearFilter==='custom'?new Date().getFullYear():parseInt(yearFilter);
-  const inPeriod=r=>{
-    if(yearFilter==='custom'){return(!dfrom||r.check_in>=dfrom)&&(!dto||r.check_in<=dto);}
-    return yearFilter==='todos'||new Date(r.check_in).getFullYear()===yN;
-  };
-  const res=allReservas.filter(r=>inPeriod(r)&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter)&&(globalPlatFilter==='todas'||r.platform===globalPlatFilter));
+  const yN=new Date().getFullYear();
+  const inPeriod=r=>(!dfrom||r.check_in>=dfrom)&&(!dto||r.check_in<=dto);
+  const res=allReservas.filter(r=>inPeriod(r)&&(selectedApts.size===0||selectedApts.has(r.apartments?.short_code))&&(selectedCanales.size===0||selectedCanales.has(r.platform)));
   // Período comparativo
   const cfrom=document.getElementById('comp-from')?.value||'';
   const cto=document.getElementById('comp-to')?.value||'';
@@ -647,7 +791,7 @@ function renderDashboard(){
   const resComp=hasCompare?allReservas.filter(r=>inCompare(r)&&r.status==='confirmed'):[];
   const brutoComp=resComp.reduce((s,r)=>s+(+r.gross_amount||0),0);
   const netoComp=resComp.reduce((s,r)=>s+(+r.gross_amount||0)-(+r.platform_commission||0)-(+r.payment_fee||0)-(+r.platform_vat||0),0);
-  const pct=(v,vc)=>{if(!hasCompare||vc===0)return'';const d=((v-vc)/vc*100);return`<span style="font-size:11px;font-weight:600;color:${d>=0?'#059669':'#DC2626'}">${d>=0?'▲':'▼'} ${Math.abs(d).toFixed(1)}%</span>`;};
+  const pct=(v,vc)=>{if(!hasCompare||vc===0)return'';const d=((v-vc)/vc*100);return`<span class="kpi-badge ${d>=0?'up':'down'}">${d>=0?'▲':'▼'} ${Math.abs(d).toFixed(1)}%</span>`;};
   const ok=res.filter(r=>r.status==='confirmed');
   const okTur=ok.filter(r=>['Booking','Airbnb','Particular','Otro'].includes(r.platform));
   // Larga temporada
@@ -661,9 +805,10 @@ function renderDashboard(){
   const bruto=ok.reduce((s,r)=>s+(+r.gross_amount||0),0);
   const neto=ok.reduce((s,r)=>s+(+r.gross_amount||0)-(+r.platform_commission||0)-(+r.payment_fee||0)-(+r.platform_vat||0),0);
   const gastosFilt=allGastos.filter(g=>{
-    if(aptFilter!=='todos'&&g.apartments?.short_code!==aptFilter)return false;
-    if(yearFilter==='custom'){return(!dfrom||g.expense_date>=dfrom)&&(!dto||g.expense_date<=dto);}
-    return yearFilter==='todos'||new Date(g.expense_date).getFullYear()===yN;
+    if(selectedApts.size>0&&!selectedApts.has(g.apartments?.short_code))return false;
+    if(dfrom&&g.expense_date<dfrom)return false;
+    if(dto&&g.expense_date>dto)return false;
+    return true;
   });
   const totalGastos=gastosFilt.reduce((s,g)=>s+(+g.amount||0),0);
   const brutoTur=okTur.reduce((s,r)=>s+(+r.gross_amount||0),0);
@@ -677,19 +822,17 @@ function renderDashboard(){
 
   const brutoTurComp=resComp.filter(r=>['Booking','Airbnb','Particular','Otro'].includes(r.platform)).reduce((s,r)=>s+(+r.gross_amount||0),0);
   document.getElementById('kpi-row').innerHTML=[
-    {icon:'💰',label:'Ingresos brutos',value:fmt(bruto),sub:ok.length+' reservas confirmadas',color:'var(--text)',comp:pct(bruto,brutoComp)},
-    {icon:'✅',label:'Ingresos netos',value:fmt(neto),sub:'Tras comisiones y cargos',color:'#059669',comp:pct(neto,netoComp)},
-    {icon:'📉',label:'Gastos operativos',value:fmt(totalGastos),sub:gastosFilt.length+' registros',color:'#DC2626',comp:''},
-    {icon:'🏖️',label:'Ingresos turísticos',value:fmt(brutoTur),sub:okTur.length+' reservas · Booking/Airbnb/Directo',color:'#D97706',comp:pct(brutoTur,brutoTurComp)},
-    {icon:'📅',label:'Tarifa media diaria',value:adrTur>0?fmtD(adrTur)+'/noche':'—',sub:nochesTur+' noches turísticas',color:'#B45309',comp:''},
-    {icon:'🌙',label:'Ingresos larga temp.',value:ltIngresos>0?fmt(ltIngresos):ltRentaMedia>0?fmt(ltRentaMedia*12)+' est.':'—',sub:ltFilt.length+' contrato(s) · '+fmt(ltRentaMedia)+'/mes',color:'#7C3AED',comp:''},
-    {icon:'📊',label:'Ocupación turística',value:ocupPct.toFixed(1)+'%',sub:nochesTur+' noches / '+diasDisp+' disponibles',color:'#047857',comp:''},
-    {icon:'🏦',label:'Resultado neto',value:fmt(resultado),sub:'Ingresos netos − gastos',color:resultado>=0?'#059669':'#DC2626',comp:pct(resultado,netoComp-0)},
-  ].map(k=>`<div class="kpi-card"><div class="kpi-icon">${k.icon}</div><div class="kpi-label">${k.label}</div><div style="display:flex;align-items:baseline;gap:7px"><div class="kpi-value" style="color:${k.color}">${k.value}</div>${k.comp||''}</div><div class="kpi-sub">${k.sub}</div></div>`).join('');
+    {label:'Ingresos brutos',value:fmt(bruto),sub:ok.length+' reservas confirmadas',color:'var(--text)',comp:pct(bruto,brutoComp)},
+    {label:'Ingresos netos',value:fmt(neto),sub:'Tras comisiones y cargos',color:'#059669',comp:pct(neto,netoComp)},
+    {label:'Gastos operativos',value:fmt(totalGastos),sub:gastosFilt.length+' registros',color:'#DC2626',comp:''},
+    {label:'Tarifa media diaria',value:adrTur>0?fmtD(adrTur)+'/noche':'—',sub:nochesTur+' noches · '+ok.length+' reservas',color:'#B45309',comp:''},
+    {label:'Ocupación turística',value:ocupPct.toFixed(1)+'%',sub:nochesTur+' noches / '+diasDisp+' disponibles',color:'#047857',comp:''},
+    {label:'Resultado neto',value:fmt(resultado),sub:'Ingresos netos − gastos',color:resultado>=0?'#059669':'#DC2626',comp:pct(resultado,netoComp-0)},
+  ].map(k=>`<div class="kpi-card" style="--kpi-color:${k.color}"><div class="kpi-label">${k.label}</div><div class="kpi-value" style="color:${k.color}">${k.value}</div><div class="kpi-footer">${k.comp||''}<span class="kpi-sub">${k.sub}</span></div></div>`).join('');
 
   // Gráfica mensual
   const mTOR=Array(12).fill(0),mBEL=Array(12).fill(0),mEUR=Array(12).fill(0);
-  okTur.forEach(r=>{const m=new Date(r.check_in).getMonth();const g=+r.gross_amount||0;const c=r.apartments?.short_code;if(c==='TOR')mTOR[m]+=g;else if(c==='BEL')mBEL[m]+=g;else mEUR[m]+=g;});
+  okTur.forEach(r=>{const m=new Date(r.check_in).getMonth();const n=(+r.gross_amount||0)-(+r.platform_commission||0)-(+r.payment_fee||0)-(+r.platform_vat||0);const c=r.apartments?.short_code;if(c==='TOR')mTOR[m]+=n;else if(c==='BEL')mBEL[m]+=n;else mEUR[m]+=n;});
   if(charts.monthly)charts.monthly.destroy();
   const datasets=aptFilter==='todos'
     ?allApartments.map((a,i)=>({label:a.short_code,data:a.short_code==='TOR'?mTOR:a.short_code==='BEL'?mBEL:mEUR,backgroundColor:(a.color||APT_COLORS[i]),borderRadius:3,stack:'a'}))
@@ -704,23 +847,9 @@ function renderDashboard(){
   const tot=chV.reduce((s,v)=>s+v,0);
   document.getElementById('channel-legend').innerHTML=chL.map((l,i)=>`<div style="display:flex;align-items:center;gap:6px;font-size:11px"><div style="width:9px;height:9px;border-radius:50%;background:${chC[i]}"></div><span style="color:var(--muted);flex:1">${l}</span><strong>${tot>0?((chV[i]/tot)*100).toFixed(0):0}%</strong></div>`).join('');
 
-  // Ocupación en dashboard
-  renderOcupDashboard(okTur,yN,diasAnio);
 
-  // Cuenta de resultados
-  const comis=ok.reduce((s,r)=>s+(+r.platform_commission||0),0);
-  const cargos=ok.reduce((s,r)=>s+(+r.payment_fee||0)+(+r.platform_vat||0),0);
-  const items=[
-    {l:'Ingresos brutos',v:bruto,c:'#B45309'},
-    {l:'Comisiones',v:-comis,c:'#DC2626'},
-    {l:'Cargos plataforma',v:-cargos,c:'#DC2626'},
-    {l:'Ingr. s/comisiones',v:bruto-comis-cargos,c:'var(--text)'},
-    {l:'Gastos operativos',v:-totalGastos,c:'#DC2626'},
-    {l:'Resultado bruto',v:neto-totalGastos,c:'#059669'},
-    {l:'IRPF (~14%)',v:-((neto-totalGastos)*0.14),c:'#DC2626'},
-    {l:'Resultado final',v:(neto-totalGastos)*0.86,c:'#059669'},
-  ];
-  document.getElementById('results-row').innerHTML=items.map((it,i)=>`<div style="flex:1;padding:10px 8px;background:${i===items.length-1?'#ECFDF5':i%2===0?'#f9fafb':'#fff'};border-right:1px solid var(--border);display:flex;flex-direction:column;gap:4px"><div style="font-size:10px;color:var(--muted);line-height:1.3">${it.l}</div><div style="font-size:12px;font-weight:800;color:${it.c}">${fmt(Math.abs(it.v))}</div></div>`).join('');
+
+
 
   renderYearComparison(okTur);
 }
@@ -752,8 +881,8 @@ function renderYearComparison(okTur){
   const YCOL=['#B45309','#047857','#D97706','#DC2626','#7C3AED'];
   const datasets=allYears.map((y,i)=>{
     const monthly=Array(12).fill(0);
-    allReservas.filter(r=>new Date(r.check_in).getFullYear()===y&&r.status==='confirmed'&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter)&&['Booking','Airbnb','Particular','Otro'].includes(r.platform))
-      .forEach(r=>{monthly[new Date(r.check_in).getMonth()]+=+r.gross_amount||0;});
+    allReservas.filter(r=>new Date(r.check_in).getFullYear()===y&&r.status==='confirmed'&&(selectedApts.size===0||selectedApts.has(r.apartments?.short_code))&&(selectedCanales.size===0||selectedCanales.has(r.platform)))
+      .forEach(r=>{monthly[new Date(r.check_in).getMonth()]+=(+r.gross_amount||0)-(+r.platform_commission||0)-(+r.payment_fee||0)-(+r.platform_vat||0);});
     return{label:String(y),data:monthly,borderColor:YCOL[i%YCOL.length],backgroundColor:'transparent',tension:.4,pointRadius:3,borderWidth:2};
   });
   if(charts.comparison)charts.comparison.destroy();
@@ -763,12 +892,12 @@ function renderYearComparison(okTur){
   // KPI comparativa
   const curY=yearFilter==='todos'?Math.max(...allYears):parseInt(yearFilter);
   const prevY=curY-1;
-  const bC=allReservas.filter(r=>new Date(r.check_in).getFullYear()===curY&&r.status==='confirmed'&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter)).reduce((s,r)=>s+(+r.gross_amount||0),0);
-  const bP=allReservas.filter(r=>new Date(r.check_in).getFullYear()===prevY&&r.status==='confirmed'&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter)).reduce((s,r)=>s+(+r.gross_amount||0),0);
+  const bC=allReservas.filter(r=>new Date(r.check_in).getFullYear()===curY&&r.status==='confirmed'&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter)).reduce((s,r)=>s+(+r.gross_amount||0)-(+r.platform_commission||0)-(+r.payment_fee||0)-(+r.platform_vat||0),0);
+  const bP=allReservas.filter(r=>new Date(r.check_in).getFullYear()===prevY&&r.status==='confirmed'&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter)).reduce((s,r)=>s+(+r.gross_amount||0)-(+r.platform_commission||0)-(+r.payment_fee||0)-(+r.platform_vat||0),0);
   const diff=bP>0?((bC-bP)/bP*100):null;
   const ds=diff===null?'Sin datos año anterior':diff>=0?`▲ +${diff.toFixed(1)}% vs ${prevY}`:`▼ ${diff.toFixed(1)}% vs ${prevY}`;
   const dc=diff===null?'var(--muted)':diff>=0?'#059669':'#DC2626';
-  document.getElementById('kpi-comparison').innerHTML=`<div class="kpi-row">${allYears.map((y,i)=>{const b=allReservas.filter(r=>new Date(r.check_in).getFullYear()===y&&r.status==='confirmed'&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter)).reduce((s,r)=>s+(+r.gross_amount||0),0);return`<div class="kpi-card" style="border-left:3px solid ${YCOL[i%YCOL.length]}"><div class="kpi-label">${y}</div><div class="kpi-value" style="color:${YCOL[i%YCOL.length]}">${fmt(b)}</div></div>`;}).join('')}<div class="kpi-card" style="border-left:3px solid var(--muted)"><div class="kpi-label">Variación ${curY} vs ${prevY}</div><div class="kpi-value" style="font-size:16px;color:${dc}">${ds}</div></div></div>`;
+  document.getElementById('kpi-comparison').innerHTML=`<div class="kpi-row">${allYears.map((y,i)=>{const b=allReservas.filter(r=>new Date(r.check_in).getFullYear()===y&&r.status==='confirmed'&&(aptFilter==='todos'||r.apartments?.short_code===aptFilter)).reduce((s,r)=>s+(+r.gross_amount||0)-(+r.platform_commission||0)-(+r.payment_fee||0)-(+r.platform_vat||0),0);return`<div class="kpi-card" style="border-left:3px solid ${YCOL[i%YCOL.length]}"><div class="kpi-label">${y}</div><div class="kpi-value" style="color:${YCOL[i%YCOL.length]}">${fmt(b)}</div></div>`;}).join('')}<div class="kpi-card" style="border-left:3px solid var(--muted)"><div class="kpi-label">Variación ${curY} vs ${prevY}</div><div class="kpi-value" style="font-size:16px;color:${dc}">${ds}</div></div></div>`;
 }
 
 // ── RESERVAS ────────────────────────────────────────────────────────
@@ -867,10 +996,11 @@ function renderGastos(){
   const dfromG=document.getElementById('date-from')?.value||'';
   const dtoG=document.getElementById('date-to')?.value||'';
   const gas=allGastos.filter(g=>{
-    if(aptFilter!=='todos'&&g.apartments?.short_code!==aptFilter)return false;
-    if(gastosCatFilter!=='todas'&&g.category!==gastosCatFilter)return false;
-    if(yearFilter==='custom'){return(!dfromG||g.expense_date>=dfromG)&&(!dtoG||g.expense_date<=dtoG);}
-    return yearFilter==='todos'||new Date(g.expense_date).getFullYear()===parseInt(yearFilter);
+    if(selectedApts.size>0&&!selectedApts.has(g.apartments?.short_code))return false;
+    if(selectedCats.size>0&&!selectedCats.has(g.category))return false;
+    if(dfromG&&g.expense_date<dfromG)return false;
+    if(dtoG&&g.expense_date>dtoG)return false;
+    return true;
   });
   const total=gas.reduce((s,g)=>s+(+g.amount||0),0);
   const yo=gas.filter(g=>g.paid_by==='Propietario').reduce((s,g)=>s+(+g.amount||0),0);
