@@ -584,13 +584,7 @@ function buildSidebar(){
 }
 
 function buildYearFilter(){
-  const years=new Set(allReservas.map(r=>new Date(r.check_in).getFullYear()).filter(y=>!isNaN(y)));
-  allGastos.forEach(g=>years.add(new Date(g.expense_date).getFullYear()));
-  const sorted=[...years].sort((a,b)=>b-a);
-  const sel=document.getElementById('year-filter');
-  sel.innerHTML=`<option value="todos">Todos los años</option>`+sorted.map(y=>`<option value="${y}">${y}</option>`).join('');
-  if(sorted.length>0&&yearFilter==='todos'){sel.value=sorted[0];yearFilter=String(sorted[0]);}
-  else sel.value=yearFilter;
+  // year-filter select no longer exists in topbar — function kept for compatibility
 }
 function setYearFilter(y){yearFilter=y;renderCurrentPage();}
 
@@ -856,23 +850,6 @@ function renderDashboard(){
   renderYearComparison(okTur);
 }
 
-function renderOcupDashboard(okTur,yN,diasAnio){
-  const el=document.getElementById('ocup-dashboard');
-  if(!el)return;
-  const gc=p=>p>=75?'#059669':p>=50?'#D97706':'#DC2626';
-  const aptsShow=aptFilter==='todos'?allApartments.map(a=>a.short_code):[aptFilter];
-  el.innerHTML=aptsShow.map(code=>{
-    const resApt=okTur.filter(r=>r.apartments?.short_code===code);
-    const monthly=Array(12).fill(0);
-    resApt.forEach(r=>{monthly[new Date(r.check_in).getMonth()]+=+r.nights||0;});
-    const diasMes=[31,28+(yN%4===0?1:0),31,30,31,30,31,31,30,31,30,31];
-    const pcts=monthly.map((n,i)=>Math.min(100,Math.round((n/diasMes[i])*100)));
-    const media=Math.round(pcts.reduce((s,v)=>s+v,0)/12);
-    const apt=allApartments.find(a=>a.short_code===code);
-    return`<div style="margin-bottom:16px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="tag ${aptClass(code)}">${code}</span><span style="font-size:13px;font-weight:600">${apt?.name||code}</span><span style="font-size:11px;color:var(--muted);margin-left:auto">Media: <strong>${media}%</strong></span></div>
-    <div class="ocup-grid">${MESES.map((m,i)=>{const p=pcts[i];const c=gc(p);return`<div class="ocup-cell"><div class="ocup-bar" style="background:${c}15;border:1px solid ${c}30"><div class="ocup-fill" style="height:${p}%;background:${c}30"></div><span class="ocup-pct" style="color:${c}">${p}%</span></div><div class="ocup-mes">${m}</div></div>`;}).join('')}</div></div>`;
-  }).join('');
-}
 
 function renderYearComparison(okTur){
   const allYears=[...new Set(allReservas.map(r=>new Date(r.check_in).getFullYear()).filter(y=>!isNaN(y)))].sort();
