@@ -364,14 +364,14 @@ tr:last-child td{border-bottom:none}
 </div>
 
     <!-- CALCULADORA -->
-    <div class="page" id="page-calc">
+    <div class="page" id="page-calc" style="overflow-y:auto">
       <!-- Filtros propios de la calculadora -->
       <div class="card" style="padding:14px 18px">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <span style="font-size:12px;font-weight:600;color:var(--muted)">Período de análisis:</span>
-          <input type="date" id="calc-from" onchange="renderCalc()" style="padding:5px 8px;border:1px solid var(--border);border-radius:7px;font-size:11px;outline:none">
+          <input type="date" id="calc-from" onchange="renderCalc()" style="padding:5px 8px;border:1px solid var(--border);border-radius:7px;font-size:11px;outline:none;width:auto">
           <span style="color:var(--muted);font-size:11px">→</span>
-          <input type="date" id="calc-to" onchange="renderCalc()" style="padding:5px 8px;border:1px solid var(--border);border-radius:7px;font-size:11px;outline:none">
+          <input type="date" id="calc-to" onchange="renderCalc()" style="padding:5px 8px;border:1px solid var(--border);border-radius:7px;font-size:11px;outline:none;width:auto">
           <div style="display:flex;gap:5px;flex-wrap:wrap" id="calc-apt-btns"></div>
           <button onclick="presetCalcYear()" style="padding:5px 10px;border:1px solid var(--border);border-radius:7px;font-size:11px;background:var(--card);cursor:pointer;color:var(--muted)">Año actual</button>
         </div>
@@ -383,18 +383,26 @@ tr:last-child td{border-bottom:none}
           <div class="card-title">Ingresos de apartamentos</div>
           <div class="card-sub">Del período seleccionado</div>
           <div id="calc-ingresos-detail"></div>
-          <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;align-items:center">
+          <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;align-items:center;gap:8px">
             <span style="font-size:12px;font-weight:600;color:var(--muted)">NETO APARTAMENTOS</span>
-            <span style="font-size:18px;font-weight:800;color:#059669" id="calc-neto-apt">—</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <input type="number" id="calc-neto-apt" step="0.01" oninput="calcManualOverride()" style="width:130px;font-size:18px;font-weight:800;color:#059669;border:2px solid #A7F3D0;border-radius:8px;padding:4px 8px;text-align:right;background:#fff;width:auto">
+              <span style="font-size:11px;color:var(--muted)">€</span>
+              <button onclick="resetCalcNeto()" title="Recalcular desde datos" style="background:none;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:10px;color:var(--muted);cursor:pointer">↺</button>
+            </div>
           </div>
         </div>
         <div class="card">
           <div class="card-title">Gastos operativos</div>
           <div class="card-sub">Del período seleccionado</div>
           <div id="calc-gastos-detail"></div>
-          <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;align-items:center">
+          <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;align-items:center;gap:8px">
             <span style="font-size:12px;font-weight:600;color:var(--muted)">TOTAL GASTOS</span>
-            <span style="font-size:18px;font-weight:800;color:#DC2626" id="calc-total-gastos">—</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <input type="number" id="calc-total-gastos" step="0.01" oninput="calcManualOverride()" style="font-size:18px;font-weight:800;color:#DC2626;border:2px solid #FCA5A5;border-radius:8px;padding:4px 8px;text-align:right;background:#fff;width:auto">
+              <span style="font-size:11px;color:var(--muted)">€</span>
+              <button onclick="resetCalcGastos()" title="Recalcular desde datos" style="background:none;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:10px;color:var(--muted);cursor:pointer">↺</button>
+            </div>
           </div>
         </div>
       </div>
@@ -485,6 +493,69 @@ tr:last-child td{border-bottom:none}
           <div class="kpi-card" style="--kpi-color:#7C3AED"><div class="kpi-label">Rentabilidad neta</div><div class="kpi-value" style="color:#7C3AED" id="calc-r-rent">—</div></div>
         </div>
         <div style="font-size:10px;color:var(--muted);margin-top:10px;line-height:1.6">* Estimación orientativa. El IRPF es progresivo — la calculadora aplica el tipo marginal al total, no por tramos. Para un cálculo exacto por tramos consulta con un asesor fiscal. No incluye mínimo personal/familiar (5.550 €) ni deducciones autonómicas.</div>
+      </div>
+
+      <!-- SIMULACIÓN LARGA TEMPORADA -->
+      <div class="card" style="border:2px solid #A7F3D0">
+        <div class="card-title" style="color:#065F46">Simulación — Larga Temporada</div>
+        <div class="card-sub">Introduce cifras hipotéticas para comparar con el alquiler turístico. La reducción del 60% se aplica automáticamente.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div class="form-group">
+              <label>Alquiler mensual (€/mes)</label>
+              <input type="number" id="lt-sim-mes" placeholder="800" step="0.01" oninput="renderLtSim()" style="width:auto">
+              <span style="font-size:10px;color:var(--muted);margin-top:2px">× 12 = ingreso anual bruto</span>
+            </div>
+            <div class="form-group">
+              <label>Gastos anuales del inmueble (€)</label>
+              <input type="number" id="lt-sim-gastos" placeholder="0" step="0.01" oninput="renderLtSim()" style="width:auto">
+              <span style="font-size:10px;color:var(--muted);margin-top:2px">IBI, comunidad, seguro, reparaciones...</span>
+            </div>
+            <div class="form-group">
+              <label>Otros ingresos (€) — trabajo u otros</label>
+              <input type="number" id="lt-sim-otros" placeholder="0" step="0.01" oninput="renderLtSim()" style="width:auto">
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <label style="margin:0;font-size:12px;color:var(--muted)">Tipo IRPF aplicado:</label>
+              <input type="number" id="lt-sim-tipo" min="0" max="100" step="0.1" oninput="renderLtSim()" style="width:70px;font-size:14px;font-weight:700;color:#B45309;border:2px solid #FCD34D;border-radius:7px;padding:4px 8px;text-align:center;background:#fff">
+              <span style="color:#B45309;font-weight:700">%</span>
+            </div>
+          </div>
+          <div style="background:#F0FDF4;border-radius:10px;padding:16px">
+            <div style="font-size:11px;font-weight:700;color:#065F46;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Resultado simulación</div>
+            <div id="lt-sim-detail" style="font-size:11px;display:flex;flex-direction:column;gap:5px;color:var(--text)"></div>
+            <div style="border-top:1px solid #A7F3D0;padding-top:10px;margin-top:10px;display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:12px;font-weight:700;color:#065F46">Neto real larga temp.</span>
+              <span style="font-size:22px;font-weight:900;color:#059669" id="lt-sim-neto">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:6px">
+              <span style="font-size:11px;color:var(--muted)">Cuota IRPF estimada</span>
+              <span style="font-size:14px;font-weight:700;color:#DC2626" id="lt-sim-cuota">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPARATIVA -->
+      <div class="card" style="background:#1C1917;color:#fff">
+        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:14px">Comparativa — ¿Qué te conviene más?</div>
+        <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center">
+          <div style="background:#292524;border-radius:10px;padding:16px;text-align:center">
+            <div style="font-size:11px;color:#a8a29e;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Alquiler Turístico</div>
+            <div style="font-size:28px;font-weight:900;color:#10b981" id="comp-turistico">—</div>
+            <div style="font-size:11px;color:#a8a29e;margin-top:4px">neto anual tras IRPF</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:13px;font-weight:700;margin-top:6px;padding:5px 14px;border-radius:20px;display:inline-block" id="comp-diff-badge">vs</div>
+            <div style="font-size:11px;color:#a8a29e;margin-top:6px" id="comp-diff-pct">—</div>
+          </div>
+          <div style="background:#292524;border-radius:10px;padding:16px;text-align:center">
+            <div style="font-size:11px;color:#a8a29e;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Larga Temporada</div>
+            <div style="font-size:28px;font-weight:900;color:#60a5fa" id="comp-larga">—</div>
+            <div style="font-size:11px;color:#a8a29e;margin-top:4px">neto anual tras IRPF</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#57534e;margin-top:12px;text-align:center;line-height:1.5" id="comp-conclusion">Completa ambas calculadoras para ver la comparativa.</div>
       </div>
     </div>
 
@@ -1591,8 +1662,7 @@ function renderCalc(){
   const comis=res.reduce((s,r)=>s+(+r.platform_commission||0)+(+r.payment_fee||0)+(+r.platform_vat||0),0);
   const neto=bruto-comis;
   const totalGas=gas.reduce((s,g)=>s+(+g.amount||0),0);
-  calcNetoApt=neto-totalGas;
-  calcTotalGastos=totalGas;
+  // calcNetoApt and calcTotalGastos set after input render below
 
   // Desglose ingresos
   const byAptI={};res.forEach(r=>{const c=r.apartments?.short_code||'?';if(!byAptI[c])byAptI[c]={bruto:0,neto:0,n:0};byAptI[c].bruto+=(+r.gross_amount||0);byAptI[c].neto+=(+r.gross_amount||0)-(+r.platform_commission||0)-(+r.payment_fee||0)-(+r.platform_vat||0);byAptI[c].n++;});
@@ -1601,16 +1671,39 @@ function renderCalc(){
     </div>
     <div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0"><span style="color:var(--muted)">Bruto total</span><span style="font-weight:600">${fmt(bruto)}</span></div>
     <div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0"><span style="color:#DC2626">Comisiones + cargos</span><span style="color:#DC2626">−${fmt(comis)}</span></div>`;
-  document.getElementById('calc-neto-apt').textContent=fmt(neto);
+  const netoInput=document.getElementById('calc-neto-apt');
+  if(netoInput&&!netoInput.dataset.manual){netoInput.value=neto.toFixed(2);}
+  calcNetoApt=netoInput?parseFloat(netoInput.value)||0:neto;
 
   // Desglose gastos por categoría
   const byCat={};gas.forEach(g=>{byCat[g.category]=(byCat[g.category]||0)+(+g.amount||0);});
   document.getElementById('calc-gastos-detail').innerHTML=`<div style="font-size:11px">${Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cat,v])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed var(--border)"><span style="color:var(--muted)">${cat}</span><span style="font-weight:600;color:#DC2626">−${fmtD(v)}</span></div>`).join('')}</div>`;
-  document.getElementById('calc-total-gastos').textContent=fmt(totalGas);
+  const gastosInput=document.getElementById('calc-total-gastos');
+  if(gastosInput&&!gastosInput.dataset.manual){gastosInput.value=totalGas.toFixed(2);}
+  calcTotalGastos=gastosInput?parseFloat(gastosInput.value)||0:totalGas;
 
   renderCalcResult();
 }
 
+function calcManualOverride(){
+  const netoInput=document.getElementById('calc-neto-apt');
+  const gastosInput=document.getElementById('calc-total-gastos');
+  if(netoInput)netoInput.dataset.manual='1';
+  if(gastosInput)gastosInput.dataset.manual='1';
+  calcNetoApt=parseFloat(netoInput?.value)||0;
+  calcTotalGastos=parseFloat(gastosInput?.value)||0;
+  renderCalcResult();
+}
+function resetCalcNeto(){
+  const el=document.getElementById('calc-neto-apt');
+  if(el){delete el.dataset.manual;}
+  renderCalc();
+}
+function resetCalcGastos(){
+  const el=document.getElementById('calc-total-gastos');
+  if(el){delete el.dataset.manual;}
+  renderCalc();
+}
 function addOtroIngreso(){
   const label=document.getElementById('calc-otro-label').value.trim();
   const importe=+document.getElementById('calc-otro-importe').value||0;
@@ -1628,10 +1721,16 @@ function renderCalcResult(){
   const listEl=document.getElementById('calc-otros-list');
   if(listEl) listEl.innerHTML=calcOtros.length?calcOtros.map((o,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;background:#F5F2ED;border-radius:7px;padding:7px 12px;font-size:12px"><span>${o.label}</span><div style="display:flex;align-items:center;gap:8px"><span style="font-weight:700;color:#B45309">${fmt(o.importe)}</span><button onclick="removeOtroIngreso(${i})" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:13px">✕</button></div></div>`).join(''):'<div style="font-size:12px;color:var(--muted)">Sin ingresos adicionales añadidos.</div>';
 
+  // Read from editable inputs if present
+  const netoEl=document.getElementById('calc-neto-apt');
+  const gastosEl=document.getElementById('calc-total-gastos');
+  if(netoEl&&netoEl.value!=='')calcNetoApt=parseFloat(netoEl.value)||0;
+  if(gastosEl&&gastosEl.value!=='')calcTotalGastos=parseFloat(gastosEl.value)||0;
+  const netoAptReal=calcNetoApt-calcTotalGastos;
   const totalOtros=calcOtros.reduce((s,o)=>s+o.importe,0);
-  const totalIngresos=calcNetoApt+totalOtros;
+  const totalIngresos=netoAptReal+totalOtros;
 
-  document.getElementById('calc-s-neto-apt').textContent=fmt(calcNetoApt);
+  document.getElementById('calc-s-neto-apt').textContent=fmt(netoAptReal);
   document.getElementById('calc-s-otros').textContent=fmt(totalOtros);
   document.getElementById('calc-s-total').textContent=fmt(totalIngresos);
 
@@ -1670,6 +1769,80 @@ function renderCalcResult(){
   document.getElementById('calc-r-cuota').textContent=fmt(cuotaAplicar);
   document.getElementById('calc-r-neto').textContent=fmt(netoReal);
   document.getElementById('calc-r-rent').textContent=rentPct.toFixed(1)+'%';
+}
+
+// ── EDITABLE OVERRIDES ─────────────────────────────────────────────
+function calcSummaryOverride(){
+  const n=parseFloat(document.getElementById('calc-s-neto-apt')?.value)||0;
+  const o=parseFloat(document.getElementById('calc-s-otros')?.value)||0;
+  document.getElementById('calc-s-total').textContent=fmt(n+o);
+  renderCalcResultFromSummary(n+o);
+}
+function calcResultOverride(){
+  const base=parseFloat(document.getElementById('calc-r-base')?.value)||0;
+  const cuota=parseFloat(document.getElementById('calc-r-cuota')?.value)||0;
+  document.getElementById('calc-r-neto').textContent=fmt(base-cuota);
+  const total=parseFloat(document.getElementById('calc-s-total')?.textContent?.replace(/[^0-9.,-]/g,'')||0);
+  document.getElementById('calc-r-rent').textContent=total>0?((base-cuota)/total*100).toFixed(1)+'%':'—';
+}
+function renderCalcResultFromSummary(total){
+  const tipo=parseFloat(document.getElementById('calc-tipo-manual')?.value)||37;
+  const red60=document.getElementById('calc-reduccion-60')?.checked;
+  const nApt=parseFloat(document.getElementById('calc-s-neto-apt')?.value)||0;
+  const base=red60?nApt*0.4+(total-nApt):total;
+  const cuota=base*tipo/100;
+  const bEl=document.getElementById('calc-r-base');
+  const cEl=document.getElementById('calc-r-cuota');
+  if(bEl&&!bEl.dataset.manual)bEl.value=base.toFixed(2);
+  if(cEl&&!cEl.dataset.manual)cEl.value=cuota.toFixed(2);
+  document.getElementById('calc-r-neto').textContent=fmt(total-cuota);
+  document.getElementById('calc-r-rent').textContent=total>0?((total-cuota)/total*100).toFixed(1)+'%':'—';
+}
+
+// ── SIMULACIÓN LARGA TEMPORADA ──────────────────────────────────────
+function renderLtSim(){
+  const mes=parseFloat(document.getElementById('lt-sim-mes')?.value)||0;
+  const anual=mes*12;
+  const gastos=parseFloat(document.getElementById('lt-sim-gastos')?.value)||0;
+  const otros=parseFloat(document.getElementById('lt-sim-otros')?.value)||0;
+  const rdtoNeto=anual-gastos;
+  const baseApt=rdtoNeto*0.4;
+  const baseTotal=baseApt+otros;
+
+  let tramoSug=TRAMOS_IRPF[0];
+  for(const t of TRAMOS_IRPF){if(baseTotal>t.desde)tramoSug=t;}
+  const tipoEl=document.getElementById('lt-sim-tipo');
+  if(tipoEl&&!tipoEl.value)tipoEl.value=tramoSug.tipo;
+  const tipo=parseFloat(tipoEl?.value)||tramoSug.tipo;
+
+  const cuota=baseTotal*tipo/100;
+  const netoReal=rdtoNeto-cuota;
+
+  const d=document.getElementById('lt-sim-detail');
+  if(d) d.innerHTML=`
+    <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #D1FAE5"><span style="color:var(--muted)">Renta anual</span><span style="font-weight:600">${fmt(anual)}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #D1FAE5"><span style="color:var(--muted)">− Gastos deducibles</span><span style="color:#DC2626">−${fmt(gastos)}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #D1FAE5"><span style="color:var(--muted)">Rdto. neto</span><span style="font-weight:600">${fmt(rdtoNeto)}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #D1FAE5"><span style="color:#059669">Reducción 60%</span><span style="color:#059669">−${fmt(rdtoNeto*0.6)}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #D1FAE5"><span style="color:var(--muted)">Base apts.</span><span>${fmt(baseApt)}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #D1FAE5"><span style="color:var(--muted)">+ Otros ingresos</span><span style="color:#B45309">+${fmt(otros)}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="font-weight:600">Base total</span><span style="font-weight:700">${fmt(baseTotal)}</span></div>`;
+
+  document.getElementById('lt-sim-cuota').textContent=fmt(cuota);
+  document.getElementById('lt-sim-neto').textContent=fmt(netoReal);
+
+  // Update comparison
+  const turNetoText=document.getElementById('calc-r-neto')?.textContent||'';
+  const turNeto=parseFloat(turNetoText.replace(/[^0-9.,-]/g,'').replace('.','').replace(',','.'))||0;
+  const diff=turNeto-netoReal;
+  const badge=document.getElementById('comp-diff-badge');
+  const pct=document.getElementById('comp-diff-pct');
+  const conc=document.getElementById('comp-conclusion');
+  document.getElementById('comp-turistico').textContent=turNetoText||'—';
+  document.getElementById('comp-larga').textContent=fmt(netoReal);
+  if(badge){badge.textContent=diff>100?'Turístico gana':diff<-100?'Larga temp. gana':'Muy similares';badge.style.background=diff>100?'#059669':diff<-100?'#1D4ED8':'#78716C';badge.style.color='#fff';}
+  if(pct)pct.textContent=Math.abs(diff)>10?`Diferencia: ${fmt(Math.abs(diff))} / año`:'';
+  if(conc&&(turNeto||netoReal)){const mejor=diff>100?'turístico':diff<-100?'larga temporada':'ambas opciones son similares';conc.textContent=Math.abs(diff)>100?`El alquiler ${mejor} genera ${fmt(Math.abs(diff))} más al año después de IRPF.`:'Ambas opciones tienen una rentabilidad muy similar. Considera factores como estabilidad, gestión y riesgo de impago.';}
 }
 
 init();
