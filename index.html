@@ -296,7 +296,7 @@ tr:last-child td{border-bottom:none}
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Apt</th><th>Huésped</th><th>Canal</th><th>Entrada</th><th>Salida</th><th>Noches</th><th>Bruto</th><th>Comisión</th><th>Cargo pago</th><th>IVA plat.</th><th>Neto</th><th>PV</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>Apt</th><th>Huésped</th><th>Canal</th><th>Entrada</th><th>Salida</th><th>Noches</th><th>Bruto</th><th>Comisión</th><th>Cargo pago</th><th>IVA plat.</th><th>Neto</th><th>PV</th><th>Estado</th><th>Nota</th><th>Acciones</th></tr></thead>
           <tbody id="res-tbody"><tr><td colspan="14" class="loading">Cargando...</td></tr></tbody>
         </table>
       </div>
@@ -335,6 +335,11 @@ tr:last-child td{border-bottom:none}
           </table>
         </div>
         <div class="card" style="width:220px"><div class="card-title">Distribución</div><canvas id="chart-gastos" height="200" style="margin-top:8px"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Gasto por apartamento</div>
+        <div class="card-sub" id="gastos-apt-sub">Total según filtros activos</div>
+        <canvas id="chart-gastos-apt" height="80" style="margin-top:10px"></canvas>
       </div>
       <div class="card">
         <div class="card-title">Todos los gastos</div>
@@ -890,7 +895,7 @@ function renderReservas(){
   const sumN=ok.reduce((s,r)=>s+(+r.gross_amount||0)-(+r.platform_commission||0)-(+r.payment_fee||0)-(+r.platform_vat||0),0);
   document.getElementById('res-stats').innerHTML=`<span>${res.length} reservas</span> <span>Bruto: <strong style="color:var(--text)">${fmt(sumB)}</strong></span> <span>Comis+cargos: <strong style="color:#DC2626">−${fmt(sumC+sumF+sumV)}</strong></span> <span>Neto: <strong style="color:#059669">${fmt(sumN)}</strong></span> <span style="font-size:10px;color:var(--muted)">(${fmt(sumB)}−${fmt(sumC+sumF+sumV)}=${fmt(sumN)})</span>`;
   const tbody=document.getElementById('res-tbody');
-  if(!res.length){tbody.innerHTML='<tr><td colspan="14" style="text-align:center;padding:30px;color:var(--muted)">Sin resultados. <a href="#" onclick="openModalReserva();return false">Añade una reserva</a> o usa el botón Importar CSV.</td></tr>';return;}
+  if(!res.length){tbody.innerHTML='<tr><td colspan="15" style="text-align:center;padding:30px;color:var(--muted)">Sin resultados. <a href="#" onclick="openModalReserva();return false">Añade una reserva</a> o usa el botón Importar CSV.</td></tr>';return;}
   tbody.innerHTML=res.map(r=>{
     const apt=r.apartments?.short_code||'?';
     const pf=+r.payment_fee||0,pv2=+r.platform_vat||0;
@@ -909,6 +914,7 @@ function renderReservas(){
       <td style="color:#059669;font-weight:700">${r.status==='confirmed'?fmtD(netoReal):'—'}</td>
       <td style="text-align:center">${pvIcon}</td>
       <td><span class="tag ${r.status==='confirmed'?'tag-ok':'tag-cancel'}">${r.status==='confirmed'?'✓ OK':'✗ Cancel.'}</span></td>
+      <td style="max-width:140px">${r.notes?`<span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px" title="${r.notes.replace(/"/g,'&quot;')}"><span style="color:#B45309;font-size:13px">💬</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.notes.substring(0,30)}${r.notes.length>30?'…':''}</span></span>`:'<span style="color:#e0dbd4;font-size:11px">—</span>'}</td>
       <td style="display:flex;gap:4px;padding:6px 12px">
         <button class="btn btn-outline btn-sm" onclick='openModalReserva(${JSON.stringify(r).replace(/'/g,"&#39;")})'>✏️</button>
         <button class="btn btn-red btn-sm" onclick="deleteReserva('${r.id}')">🗑️</button>
@@ -998,6 +1004,43 @@ function renderGastos(){
   if(charts.gastos)charts.gastos.destroy();
   charts.gastos=new Chart(document.getElementById('chart-gastos').getContext('2d'),{type:'pie',data:{labels:cats.map(c=>c[0]),datasets:[{data:cats.map(c=>c[1]),backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},options:{plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},responsive:true}});
   document.getElementById('gastos-list-tbody').innerHTML=gas.length?gas.map(g=>`<tr><td>${g.expense_date}</td><td><span class="tag ${aptClass(g.apartments?.short_code||'')}">${g.apartments?.short_code||'?'}</span></td><td>${g.category}</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;color:var(--muted)">${g.description||'—'}</td><td style="font-weight:700">${fmtD(+g.amount)}</td><td style="font-size:11px;color:${g.paid_by==='Propietario'?'#DC2626':'#059669'}">${g.paid_by}</td><td style="display:flex;gap:4px;padding:6px 12px"><button class="btn btn-outline btn-sm" onclick='openModalGasto(${JSON.stringify(g).replace(/'/g,"&#39;")})'>✏️</button><button class="btn btn-red btn-sm" onclick="deleteGasto('${g.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="7" class="loading">Sin gastos. <a href="#" onclick="openModalGasto();return false">Añade el primero</a>.</td></tr>';
+
+  // Gráfica por apartamento
+  const byApt={};
+  gas.forEach(g=>{const code=g.apartments?.short_code||'?';byApt[code]=(byApt[code]||0)+(+g.amount||0);});
+  const aptCodes=Object.keys(byApt);
+  const aptVals=aptCodes.map(c=>byApt[c]);
+  const aptColors=aptCodes.map(c=>c==='TOR'?'#B45309':c==='BEL'?'#047857':c==='EUR'?'#DC2626':'#888');
+  const sub=selectedCats.size>0?[...selectedCats].join(', '):'Todos los gastos';
+  const subEl=document.getElementById('gastos-apt-sub');
+  if(subEl)subEl.textContent=sub;
+  if(charts.gastosApt)charts.gastosApt.destroy();
+  const ctxApt=document.getElementById('chart-gastos-apt');
+  if(ctxApt&&aptCodes.length>0){
+    charts.gastosApt=new Chart(ctxApt.getContext('2d'),{
+      type:'bar',
+      data:{
+        labels:aptCodes.map(c=>{const a=allApartments.find(ap=>ap.short_code===c);return a?a.name.split(' ')[0]+' ('+c+')':c;}),
+        datasets:[{
+          label:'Gasto total (€)',
+          data:aptVals,
+          backgroundColor:aptColors.map(c=>c+'CC'),
+          borderColor:aptColors,
+          borderWidth:1.5,
+          borderRadius:6,
+        }]
+      },
+      options:{
+        indexAxis:'y',
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'  '+fmtD(ctx.parsed.x)}}},
+        scales:{
+          x:{grid:{color:'#f3f4f6'},ticks:{callback:v=>fmt(v)},beginAtZero:true},
+          y:{grid:{display:false},ticks:{font:{size:12}}}
+        },
+        responsive:true
+      }
+    });
+  }
 }
 function toggleGastoMeses(){
   const checked=document.getElementById('gasto-repetir').checked;
